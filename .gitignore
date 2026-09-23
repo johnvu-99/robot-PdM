@@ -1,0 +1,21 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Local environment
+.env
+.vscode/
+
+# Third-party raw datasets: not redistributed here.
+# Download them from the authoritative sources listed in DATASETS.md.
+**/data/external/
+
+# Runtime output
+**/data/logs/
