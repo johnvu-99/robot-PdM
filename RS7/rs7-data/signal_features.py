@@ -1,70 +1,97 @@
 """
-Shared logic for run-to-failure bearing datasets (XJTU-SY, PHM 2012).
+Condition monitoring features for raw vibration and torque segments.
 
-Each run is a sequence of short vibration snapshots. Time comes from the file
-number and the snapshot interval, so a partially downloaded run still has
-correct timing. Labels:
-
-    life_fraction = t / t_failure       (0 at the start, 1 at the last snapshot)
-    RUL_fraction  = 1 - life_fraction
+Pure numpy. Time domain: RMS, std, peak to peak, crest factor, kurtosis,
+skewness, energy. Frequency domain: dominant frequency, spectral centroid,
+band energies. Torque: mean, RMS, std, peak, trend.
 """
 
 import numpy as np
 
-from datasets.base_adapter import DatasetAdapter, file_number
-from datasets.signal_features import vibration_feature_names, vibration_features
+import config
+
+VIBRATION_STATS = ("rms", "std", "p2p", "crest_factor", "kurtosis", "skewness", "energy",
+                   "dominant_frequency", "spectral_centroid", "spectral_energy")
+TORQUE_STATS = ("mean", "rms", "std", "peak", "trend")
 
 
-class RunToFailureAdapter(DatasetAdapter):
+def band_names():
+    return tuple("band_energy_%d" % i for i in range(len(config.SPECTRAL_BANDS)))
 
-    snapshot_channels = ("horizontal", "vertical")
 
-    def read_snapshot(self, path):
-        """(samples, 2) horizontal and vertical acceleration."""
-        raise NotImplementedError
+def vibration_feature_names(prefix):
+    return tuple("%s_%s" % (prefix, s) for s in VIBRATION_STATS + band_names())
 
-    def feature_names(self):
-        names = []
-        for channel in self.snapshot_channels:
-            names.extend(vibration_feature_names(channel))
-        return tuple(names)
 
-    def snapshot_times(self, recording):
-        first = file_number(recording.files[0])
-        return np.array([(file_number(f) - first) * recording.snapshot_interval
-                         for f in recording.files], dtype=np.float64)
+def torque_feature_names(prefix):
+    return tuple("%s_%s" % (prefix, s) for s in TORQUE_STATS)
 
-    def extract_run(self, recording, progress=None, cancel=None):
-        """
-        Returns dict(times, features, names, life_fraction, rul_fraction).
-        Cached in data/processed/<dataset>/.
-        """
-        names = self.feature_names()
-        cache = self.cache_path(recording, "run")
-        signature = recording.signature()
-        cached = self.load_cache(cache, signature)
-        if cached is None or tuple(cached["names"]) != names:
-            rows = []
-            for index, path in enumerate(recording.files):
-                snapshot = self.read_snapshot(path)
-                row = []
-                for c in range(len(self.snapshot_channels)):
-                    row.extend(vibration_features(snapshot[:, c], recording.sample_rate))
-                rows.append(row)
-                if progress is not None and index % 50 == 0:
-                    progress(index, len(recording.files))
-                if cancel is not None and cancel():
-                    raise KeyboardInterrupt("cancelled")
-            features = np.array(rows, dtype=np.float64)
-            self.save_cache(cache, signature, features=features, names=np.array(names))
-        else:
-            features = cached["features"]
-        times = self.snapshot_times(recording)
-        life = times / times[-1] if times[-1] > 0 else np.zeros_like(times)
-        return {
-            "run_id": recording.run_id, "dataset": self.name, "condition": recording.condition,
-            "times": times, "features": features, "names": names,
-            "life_fraction": life, "rul_fraction": 1.0 - life,
-            "total_life_s": float(times[-1]),
-        }
 
+def vibration_features(signal, sample_rate):
+    """signal: 1 D array. Returns a tuple aligned with vibration_feature_names()."""
+    x = np.asarray(signal, dtype=np.float64)
+    x = x - x.mean()
+    n = x.shape[0]
+    std = x.std()
+    rms = float(np.sqrt(np.mean(x * x)))
+    peak = float(np.max(np.abs(x))) if n else 0.0
+    if std > 1e-12:
+        z = x / std
+        kurtosis = float(np.mean(z ** 4))
+        skewness = float(np.mean(z ** 3))
+    else:
+        kurtosis = 0.0
+        skewness = 0.0
+    energy = float(np.sum(x * x))
+
+    spectrum = np.abs(np.fft.rfft(x * np.hanning(n))) ** 2
+    freqs = np.fft.rfftfreq(n, 1.0 / sample_rate)
+    spectrum[0] = 0.0
+    total = float(spectrum.sum())
+    if total > 0.0:
+        dominant = float(freqs[int(np.argmax(spectrum))])
+        centroid = float(np.sum(freqs * spectrum) / total)
+    else:
+        dominant = 0.0
+        centroid = 0.0
+    nyquist = 0.5 * sample_rate
+    bands = []
+    for low, high in config.SPECTRAL_BANDS:
+        mask = (freqs >= low * nyquist) & (freqs < high * nyquist if high < 1.0 else freqs <= nyquist)
+        bands.append(float(spectrum[mask].sum() / total) if total > 0.0 else 0.0)
+    return (rms, float(std), float(x.max() - x.min()) if n else 0.0,
+            peak / rms if rms > 1e-12 else 0.0, kurtosis, skewness, energy,
+            dominant, centroid, total) + tuple(bands)
+
+
+def torque_features(signal, sample_rate):
+    x = np.asarray(signal, dtype=np.float64)
+    n = x.shape[0]
+    t = np.arange(n) / sample_rate
+    tc = t - t.mean()
+    denominator = float(np.sum(tc * tc))
+    trend = float(np.sum(tc * (x - x.mean())) / denominator) if denominator > 0 else 0.0
+    return (float(x.mean()), float(np.sqrt(np.mean(x * x))), float(x.std()),
+            float(np.max(np.abs(x))), trend)
+
+
+def parse_numeric_text(text, columns):
+    """
+    Fast parse of delimited numbers (comma, tab or semicolon, optional trailing
+    separator). Returns (rows, columns). Partial trailing rows are dropped.
+    """
+    cleaned = text.replace("\t", ",").replace(";", ",").replace("\r", "")
+    lines = cleaned.split("\n")
+    if len(lines) > 1 and not cleaned.endswith("\n"):
+        # The final line has no terminator: it may be cut mid number.
+        lines = lines[:-1]
+    rows = []
+    for line in lines:
+        line = line.strip().rstrip(",")
+        if line:
+            rows.append(line)
+    if not rows:
+        return np.zeros((0, columns))
+    flat = np.array(",".join(rows).split(","), dtype=np.float64)
+    usable = (flat.shape[0] // columns) * columns
+    return flat[:usable].reshape(-1, columns)
