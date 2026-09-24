@@ -607,40 +607,41 @@ All jobs run in a separate process. Physics stayed at 239.8 Hz while they ran.
 
 ### Measured on the dev machine
 
-Tested on a partial download: the first 6 MB of 12 SEU files, and every third
-snapshot of 7 PHM bearings (3 Learning_set, 4 Full_Test_Set).
+Full downloads: all 20 SEU recordings, all 40 CWRU files, and every snapshot of
+all 17 PHM bearings (6 Learning_set, 11 Full_Test_Set). Fault validation took
+18 s with features cached.
 
-Fault validation, SEU drivetrain (later time blocks, unseen in training):
+Fault validation (later time blocks, unseen in training):
 
-| Check | Result |
-| --- | --- |
-| 9 class fault classification | accuracy 0.93, macro F1 0.91 |
-| Anomaly detection, per rig and condition | every fault label detected in 100% of test segments, ROC AUC 0.99 - 1.00 |
-| False alarms on healthy test segments | 0 - 9% |
+| Check | SEU drivetrain | CWRU bearings |
+| --- | --- | --- |
+| Fault classification | 9 classes: accuracy 0.996, macro F1 0.996 | 4 classes: accuracy 0.980, macro F1 0.978 |
+| Anomaly detection, per rig and condition | every fault label detected in 100% of test segments, ROC AUC 0.96 - 1.00 | 100% for every label except ball fault at load 0 (72%); ROC AUC 0.99 - 1.00 |
+| False alarms on healthy test segments | 3 - 11% | 0% at loads 0 - 2, 22% at load 3 |
+
+The top classifier features on SEU are motor torque std and RMS, then motor and
+planetary band energies. On a partial download (first 6 MB of 12 SEU files)
+classification accuracy was 0.93, so more data helped. CWRU load 0 has only 10
+healthy training segments, which is why its ball fault detection is weakest.
 
 Anomaly detection must be trained per rig and operating condition: a single
 healthy model pooled over the gearbox at 20-0, the gearbox at 30-2 and the
 bearing rig detected nothing, because "healthy" became broader than the faults.
 
-RUL, PHM Learning_set (3 runs) -> Full_Test_Set (4 runs):
+RUL, PHM Learning_set (6 runs) -> Full_Test_Set (11 runs):
 
-| Model | Validation MAE | RMSE | R2 |
-| --- | --- | --- | --- |
-| Linear regression | 0.136 | 0.162 | 0.66 |
-| Random forest | 0.210 | 0.260 | 0.15 |
-| Gradient boosting | 0.230 | 0.278 | -0.01 |
+| Model | Cross validation MAE / R2 | Validation MAE / RMSE / R2 / rank |
+| --- | --- | --- |
+| Linear regression | 0.202 / 0.19 | 0.257 / 0.328 / -0.39 / 0.65 |
+| **Random forest** | 0.200 / 0.17 | **0.198 / 0.243 / 0.22 / 0.83** |
+| Gradient boosting | 0.182 / 0.32 | 0.215 / 0.259 / 0.10 / 0.90 |
 
-Per run, the linear model ranged from R2 0.88 (Bearing2_6) to 0.28
-(Bearing2_7, a 38 minute life). With three training bearings the flexible
-models overfit, which is why the interpretable baseline wins here. These are
-small sample numbers, not a benchmark claim.
-
-**Not verified on real XJTU-SY files.** The data is hosted outside GitHub, so
-the adapter was written to the documented layout and tested on a synthetic
-folder with that structure (header row, 32768 x 2 samples, 3 conditions). It
-parsed correctly (about 10 ms per snapshot) and the XJTU -> PHM protocol ran end
-to end, but no XJTU-SY performance figures exist yet. Please check the first
-Load Dataset report when you have the real files.
+Random forest has the lowest validation error; gradient boosting orders the
+bearings best (rank 0.90, 0.61 to 0.98 per bearing) but its absolute RUL is off
+on the short and slow bearings (Bearing2_5 to 3_3, R2 below 0). An earlier run
+on a partial download (3 -> 4 bearings, every third snapshot) favoured linear
+regression (MAE 0.136); with all bearings it is the worst, so that result was a
+small sample effect. These are small sample numbers, not a benchmark claim.
 
 ## Phase 7: health score, predictive maintenance and dashboard
 
@@ -869,17 +870,24 @@ Without XJTU-SY, use `--protocol PHM_LEARNING_TO_FULL_TEST`.
 
 All 15 bearings (9216 snapshot files, 11 GB), features extracted in 2 min 19 s
 and cached in `data/processed/` (1.7 MB). Trained on XJTU-SY with leave one
-bearing out cross validation, validated on PHM 2012 bearings the model never
-saw (a different lab, machine and load).
+bearing out cross validation, validated on all 17 PHM 2012 bearings (every
+snapshot), which the model never saw (a different lab, machine and load).
 
 | Model | XJTU cross validation MAE / R2 | PHM validation MAE / R2 / rank |
 | --- | --- | --- |
-| Linear regression | 0.212 / 0.12 | 0.266 / -0.30 / - |
-| **Random forest** | 0.209 / 0.19 | **0.173 / 0.47 / 0.77** |
-| Gradient boosting | 0.193 / 0.32 | 0.218 / 0.10 / 0.74 |
+| Linear regression | 0.212 / 0.12 | 0.311 / -0.83 / 0.74 |
+| **Random forest** | 0.209 / 0.19 | **0.216 / 0.15 / 0.53** |
+| Gradient boosting | 0.193 / 0.32 | 0.268 / -0.35 / 0.65 |
 
-Random forest is the default (`RUL_DEFAULT_MODEL`). Per bearing it reaches R2
-0.20 to 0.72 on PHM 2012, with rank correlation 0.62 to 0.95.
+Random forest is the default (`RUL_DEFAULT_MODEL`) and still has the lowest
+validation error. Per bearing it ranges from R2 0.77 (Bearing2_7) to -0.66
+(Bearing1_5), and its rank correlation from 0.94 down to -0.41 (Bearing2_5), so
+on some PHM bearings it does not even get the order right.
+
+An earlier measurement against a partial PHM download (7 bearings, every third
+snapshot) gave random forest MAE 0.173, R2 0.47, rank 0.77. The full set is
+clearly harder, and training on PHM's own Learning_set (0.198 / 0.22 / 0.83,
+above) now beats training on XJTU-SY. Transfer from XJTU-SY to PHM is weak.
 
 Two things were changed after measuring on the real data:
 
@@ -891,5 +899,5 @@ Two things were changed after measuring on the real data:
   R2 -0.69 to MAE 0.266, R2 -0.30.
 * **Rank correlation reported** next to MAE and R2. Across datasets the
   predicted fraction is biased (XJTU bearings live up to 42 h, PHM bearings
-  under 2.5 h, so PHM bearings look closer to failure than they are) while the
-  ordering stays right, and an alarm threshold needs the ordering.
+  0.6 to 7.8 h, so PHM bearings look closer to failure than they are), and an
+  alarm threshold needs the ordering more than the absolute number.

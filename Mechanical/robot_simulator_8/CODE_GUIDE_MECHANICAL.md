@@ -980,16 +980,18 @@ when it runs on Mechanical-datasets.
   10 s) are smoothed over the same real time. Measured effect on the real
   XJTU → PHM validation with linear regression: MAE 0.314 → 0.266, R2 -0.69 →
   -0.30. Set the flag to False to get the old per snapshot behaviour.
-- **Predicted RUL does not transfer in absolute value between datasets.** A
-  model trained on XJTU-SY (lives 0.7 to 42 h) predicts PHM bearings (0.6 to
-  2.4 h) as closer to failure than they are; the linear model reached 0 by
-  half of life. The ORDER is still right, which is why `rank_correlation`
-  (Spearman) is reported next to R2: an alarm threshold needs the ordering,
-  not the absolute number.
-- **How many training bearings you have changes which model wins.** With 3
-  training bearings (PHM only) linear regression was best; with the 15 real
-  XJTU-SY bearings the random forest is clearly best (see the table in
-  README.md). Do not carry a model choice over from a smaller experiment.
+- **Predicted RUL transfers poorly between datasets.** A model trained on
+  XJTU-SY (lives 0.7 to 42 h) predicts PHM bearings (0.6 to 7.8 h) as closer
+  to failure than they are. On all 17 PHM bearings the random forest reaches
+  only R2 0.15 and rank 0.53, and gets the order wrong on some bearings
+  (Bearing1_5, Bearing2_5). Training on PHM's own Learning_set does better
+  (R2 0.22, rank 0.83). `rank_correlation` (Spearman) is reported next to R2
+  because an alarm threshold needs the ordering more than the absolute number.
+- **How much data you test on changes which model wins.** On a partial PHM
+  download (3 training bearings) linear regression was best; with all 6 PHM
+  training bearings, and with the 15 XJTU-SY bearings, the random forest has
+  the lowest validation error (see the tables in README.md). Do not carry a
+  model choice over from a smaller experiment.
 - **Partner results so far come from synthetic data** and say nothing about real
   performance.
 

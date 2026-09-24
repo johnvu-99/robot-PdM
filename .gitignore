@@ -19,3 +19,11 @@ venv/
 
 # Runtime output
 **/data/logs/
+
+# Earlier phases (1-6) are kept locally only, not published
+/RS1/
+/RS2/
+/RS3/
+/RS4/
+/RS5/
+/RS6/

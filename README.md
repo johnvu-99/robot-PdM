@@ -7,20 +7,16 @@ second: fixed 240 Hz physics on a dedicated thread, offscreen PyBullet
 rendering, PyQt5 front end — grown phase by phase into a condition-monitoring
 and remaining-useful-life (RUL) research platform.
 
-Each phase is kept as its own self-contained snapshot rather than being
-squashed into one history, so the progression stays inspectable.
+Each published phase is kept as its own self-contained snapshot. Phases 1 to 6
+(core simulator, fault injection, telemetry, baselines, anomaly detection, first
+dataset adapters) are included in both folders below and are not published
+separately.
 
 ## Repository layout
 
 | Folder | Phase | What it adds |
 | --- | --- | --- |
-| [`RS1/`](RS1/robot_simulator) | 1 | Core simulator: physics thread, URDF loading, joint control, trajectories, camera, UI |
-| [`RS2/`](RS2/robot_simulator_2) | 2 | Fault injection and trajectory work on the core simulator |
-| [`RS3/`](RS3/robot_simulator_3) | 3 | Telemetry ring buffer, feature extraction, CSV logging (`monitoring/`, `storage/`) |
-| [`RS4/`](RS4/robot_simulator_4) | 4 | Baselines and labelled dataset generation |
-| [`RS5/`](RS5/robot_simulator_5) | 5 | Anomaly detection: rule-based detector and Isolation Forest (`models/`) |
-| [`RS6/`](RS6/robot_simulator_6) | 6 | Real mechanical dataset adapters and RUL (`datasets/`, `predictive/`) |
-| [`RS7/`](RS7/robot_simulator_7) | 7 | RUL pipeline refinement: leakage controls, cross-dataset validation |
+| [`RS7/`](RS7/robot_simulator_7) | 1 - 7 | Full simulator through phase 7: RUL pipeline refinement, leakage controls, cross-dataset validation |
 | [`Mechanical/`](Mechanical/robot_simulator_8) | 7 + partner data | Current line of work: partner dataset ingestion, `tools/`, trained RUL models |
 
 Start with [`Mechanical/robot_simulator_8/README.md`](Mechanical/robot_simulator_8/README.md)
