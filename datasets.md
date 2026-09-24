@@ -1,4 +1,4 @@
-# Datasets: authoritative sources
+# DATASETS: authoritative sources
 
 None of the raw third-party data is redistributed in this repository. Every
 dataset below is licensed and published by its originating institution, and
