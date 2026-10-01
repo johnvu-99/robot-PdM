@@ -15,12 +15,12 @@ and remaining-useful-life (RUL) research platform.
 | --- | --- | --- |
 | Simulator | KUKA iiwa with fault injection, a motor thermal model, live telemetry, per-joint health scores and maintenance advice | physics holds 240 Hz with all dashboards running |
 | Fault detection | anomaly detection trained on healthy data only, plus fault classification, on the SEU gearbox and CWRU bearing test rigs | 99.6% accuracy (9 classes, SEU), 98.0% (4 classes, CWRU) |
-| Remaining useful life (RUL) | predicts the share of life left from vibration, on 32 run-to-failure bearings from two labs (XJTU-SY, PHM 2012) | trained on one lab, tested on the other: error 18% of life (guessing: 25%), order of degradation right (rank 0.82) |
+| Remaining useful life (RUL) | predicts the share of life left from vibration, on 32 run-to-failure bearings from two labs (XJTU-SY, PHM 2012) | trained on one lab, tested on the other: error 17.5% of life (guessing: 25%), order of degradation right (rank 0.84), and every prediction comes with a 90% range that held on 94% of unseen snapshots |
 
 These are test rig datasets, not robot telemetry. The limits are documented as
 carefully as the results: which bearings the model still gets wrong and why,
-which ideas were tried and rejected, and two known weaknesses kept visible as
-expected-failure tests.
+which ideas were tried and rejected, and two weaknesses that the tests exposed
+and that were then fixed.
 
 ## Repository layout
 
@@ -33,9 +33,9 @@ as the git tag [`phase-7`](https://github.com/johnvu-99/robot-PdM/tree/phase-7).
 | Where | What |
 | --- | --- |
 | [`README.md`](Mechanical/robot_simulator_8/README.md) | architecture, install, how to run, all results |
-| [`CODE_GUIDE_MECHANICAL.md`](Mechanical/robot_simulator_8/CODE_GUIDE_MECHANICAL.md) | code walkthrough; section 9 is the full story of the RUL experiments, including the ones that failed |
+| [`CODE_GUIDE_MECHANICAL.md`](Mechanical/robot_simulator_8/CODE_GUIDE_MECHANICAL.md) | code walkthrough; sections 9 to 11 are the full story of the experiments, including the ones that failed |
 | [`results/baseline_2026-09-28/`](Mechanical/robot_simulator_8/results/baseline_2026-09-28) | frozen baseline of every model and the experiment log |
-| [`tests/`](Mechanical/robot_simulator_8/tests) | about 50 tests, run on every push |
+| [`tests/`](Mechanical/robot_simulator_8/tests) | about 65 tests, run on every push |
 | [`PARTNER_DATA_SPEC.md`](Mechanical/robot_simulator_8/PARTNER_DATA_SPEC.md) | how a partner should record and hand over robot data |
 
 ## Datasets

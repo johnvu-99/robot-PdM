@@ -24,6 +24,8 @@ Contents
 7. Known limitations
 8. Where to change what
 9. Improving XJTU → PHM: every experiment and the thinking behind it
+10. Uncertainty ranges: how sure is the prediction?
+11. Two weaknesses the tests found, and how they were fixed
 
 ---
 
@@ -603,7 +605,10 @@ temperature columns (names ending in `_rise_over_ambient`, `_rise_per_watt` or
    otherwise produce z scores in the thousands.
 4. Threshold = 95th percentile of scores on the calibration part.
 5. For temperature columns, stores the healthy median as a reference.
-6. Refuses to train with fewer than about 15 healthy windows.
+6. **Single feature threshold** (if `ANOMALY_FEATURE_CHECK`): for every
+   calibration window, take the largest robust z of any feature; the threshold
+   is the 99th percentile of those, never below 6. See section 11.
+7. Refuses to train with fewer than about 15 healthy windows.
 
 `raw_scores(x)` — the anomaly score of each window (higher = more unusual).
 
@@ -613,7 +618,8 @@ feature to its healthy median. 1.0 is normal; 2.0 means twice the usual rise.
 `score(x, top=3)` — per window: the score, score / threshold, whether it is
 anomalous, the thermal ratio, and the 3 features that deviate most. A window is
 anomalous if the forest score is above the threshold **or** the thermal ratio
-reaches 1.6. The thermal check exists because a cooling fault moves a few slow
+reaches 1.6 **or** any single feature is beyond the single feature threshold
+(`feature_alarm` in the result). The thermal check exists because a cooling fault moves a few slow
 features moderately, and a forest spread over ~100 features averages that
 away: on test data the forest alone caught 6.6% of cooling windows, with the
 thermal check 75%.
@@ -717,7 +723,9 @@ both training and testing.
 snapshot where degradation has started. This bearing's first 10 minutes define
 its normal range; degradation = the fast EMA of RMS growth or of kurtosis stays
 above `mean + RUL_FPT_K × std` of that range for `RUL_FPT_SUSTAIN_S` seconds.
-Uses only past snapshots. Returns the run length if it never happens.
+The std is never taken below `RUL_FPT_STD_FLOOR` (5%): without that minimum the
+detector fired on pure noise (section 11). Uses only past snapshots. Returns
+the run length if it never happens.
 
 **`postprocess_prediction(prediction, run, training_dataset)`** — cleans up a
 predicted RUL curve, using only the past. If the run comes from a dataset the
@@ -734,9 +742,15 @@ model was NOT trained on, it is smoothed with a 15 minute EMA
   loudness reference → model → if the model has an FPT floor, predictions
   before this bearing's FPT are raised to at least the floor (the "gate") →
   `postprocess_prediction`. Refuses a run with a different feature layout.
+- `set_interval(pairs)` — builds the uncertainty range from (prediction, truth)
+  pairs of bearings the model did not train on: the half width is the 90%
+  quantile of the absolute errors, every bearing counted equally (section 10).
+- `predict_interval(prediction)` — (low, high) = prediction ∓ half width,
+  clipped to 0–1. `None` if the model has no range.
 - `save(path)`, `load(path)` — joblib files marked `target: RUL_fraction`,
-  including `loudness_reference` and `fpt_floor`. Files saved before these
-  existed load as `START` and no gate, so old models keep working unchanged.
+  including `loudness_reference`, `fpt_floor` and `interval`. Files saved
+  before these existed load as `START`, no gate and no range, so old models
+  keep working unchanged.
 
 **`run_metrics(run, prediction)`**
 - `mae` — mean absolute error of the RUL fraction. 0.15 means off by 15% of the
@@ -748,11 +762,16 @@ model was NOT trained on, it is smoothed with a 15 minute EMA
   remaining time with `elapsed × f / (1 − f)`, from 50% of life onwards. This
   formula explodes when f is close to 1, so treat large values with caution.
 
+**`interval_metrics(run, low, high)`** — `coverage`: the share of snapshots
+whose true RUL is inside the range; `interval_width`: its average size.
+
 **`aggregate(metrics)`** — averages the metrics over bearings.
 
-**`leave_one_run_out(runs, kind, loudness_reference, fpt_gate)`** — for each
-bearing: train on all others (with the same settings as the final model), test
-on it. The standard way to test with few bearings.
+**`leave_one_run_out(runs, kind, loudness_reference, fpt_gate, collect)`** — for
+each bearing: train on all others (with the same settings as the final model),
+test on it. The standard way to test with few bearings. If `collect` is a list,
+each held out bearing's (prediction, truth) is added to it: these honest errors
+are what the uncertainty range is built from.
 
 ---
 
@@ -965,6 +984,8 @@ python -m tools.partner_data score    --root FOLDER --model FILE
 | `RUL_QUIETEST_TAU_S` | 300 s | smoothing before taking the running minimum |
 | `RUL_FPT_GATE_BY_PROTOCOL` | XJTU_TO_PHM: on, others: off | no prediction below the floor before degradation starts (section 9, Fix 4) |
 | `RUL_FPT_K` / `RUL_FPT_SUSTAIN_S` / `RUL_FPT_HEALTHY_S` | 5 / 120 s / 600 s | degradation start = 5 std above normal for 2 minutes, normal = first 10 minutes |
+| `RUL_FPT_STD_FLOOR` | 0.05 | "normal" never varies by less than 5%, so noise alone is not degradation (section 11) |
+| `RUL_INTERVAL_LEVEL` | 0.90 | the uncertainty range should contain the true RUL this often (section 10) |
 | `RUL_CROSS_DATASET_SMOOTHING_TAU_S` | 900 s | smooth predictions on a dataset the model was not trained on |
 | `RUL_MONOTONE_PREDICTION` | False | force RUL to only go down (rejected, section 9) |
 | `RUL_TREND_FEATURES` / `RUL_DROP_LOUDNESS_FEATURES` | False / False | Fix 2 options (rejected, section 9) |
@@ -994,6 +1015,8 @@ python -m tools.partner_data score    --root FOLDER --model FILE
 | `PARTNER_MAX_NAN_FRACTION` | 0.05 | warn above 5% missing values |
 | `PARTNER_RATE_TOLERANCE` | 0.05 | allowed mismatch between timestamps and declared rate |
 | `THERMAL_RATIO_WARN` | 1.6 | thermal alarm at 1.6 × the healthy temperature rise |
+| `ANOMALY_FEATURE_CHECK` | True | also alarm when any single feature is extremely far from healthy (section 11) |
+| `ANOMALY_FEATURE_Z_PERCENTILE` / `ANOMALY_FEATURE_Z_MIN` | 99 / 6 | single feature threshold: 99th percentile on held-out healthy data, never below 6 robust std |
 
 The anomaly engine also uses the partner threshold and calibration settings
 when it runs on Mechanical-datasets.
@@ -1018,7 +1041,8 @@ when it runs on Mechanical-datasets.
   XJTU → PHM validation with linear regression: MAE 0.314 → 0.266, R2 -0.69 →
   -0.30. Set the flag to False to get the old per snapshot behaviour.
 - **Transfer between datasets is improved, not solved.** XJTU → PHM went from
-  MAE 0.216, R2 0.15, rank 0.53 to MAE 0.181, R2 0.39, rank 0.82 (section 9),
+  MAE 0.216, R2 0.15, rank 0.53 to MAE 0.175, R2 0.43, rank 0.84 (sections 9
+  and 11),
   and now beats training on PHM itself (0.198 / 0.22 / 0.83). Still weak:
   Bearing2_7 (38 minute life, R2 -0.24), Bearing1_1 (rank 0.19) and
   Bearing2_3 (rank 0.32). `rank_correlation` (Spearman) is reported next to
@@ -1036,13 +1060,11 @@ when it runs on Mechanical-datasets.
   training bearings, and with the 15 XJTU-SY bearings, the random forest has
   the lowest validation error (see the tables in README.md). Do not carry a
   model choice over from a smaller experiment.
-- **A fault that changes only one feature is often missed.** In the tests, one
-  feature moved by 10–15 standard deviations was flagged in only about 70% of
-  windows; two features together, 100%. An Isolation Forest dilutes a single
-  unusual feature among the normal ones. The thermal ratio check was added for
-  exactly this reason; the other features have no such check yet.
-- **The degradation detector (FPT) fires on noise**, see the correction under
-  Fix 4 in section 9.
+- **The uncertainty ranges are honest but wide.** A 90% range is the
+  prediction ± 0.42: about 0.70 of the whole 0-to-1 scale. That is the model's
+  real precision. On single bearings coverage can be lower (73% on Bearing1_1).
+- **The single feature check costs a few false alarms** (about +1.4 points on
+  three SEU setups) and its settings were fixed in advance, not tuned.
 - **Partner results so far come from synthetic data** and say nothing about real
   performance.
 
@@ -1294,17 +1316,13 @@ degradation is detected, the model is not allowed to say "70% of life is gone"
 — which is exactly the Bearing1_5 mistake from Step 1. It improved all three
 dev metrics clearly, and the test bearings agree.
 
-**Correction (1 Oct, found by the tests).** The detector is weaker than its
-name suggests. On a synthetic bearing that NEVER wears, it still fired in every
-trial (at snapshot 21–85 of 200): "normal" is measured from only the first 10
-minutes (11 snapshots at one per minute), too few to know the real spread, so
-noise alone exceeds 5 standard deviations. That is also why it fires at 10–20%
-of life on PHM. So the gate works mostly as **"do not predict a low RUL early
-in life"**, not as a true degradation detector. The improvement is still real —
-it was chosen on dev and confirmed on test — but the honest description is the
-weaker one. A sturdier detector (a longer normal window, or a minimum spread)
-is future work and must go through the same dev/test check. The weakness is
-recorded as an expected failure in `tests/test_rul_model.py`.
+**Correction (1 Oct, found by the tests).** The detector was weaker than its
+name suggests. On a synthetic bearing that NEVER wears, it fired in every trial:
+"normal" was measured from only the first 10 minutes, too few snapshots to know
+the real spread, so noise alone exceeded 5 standard deviations. The gate
+therefore worked mostly as "do not predict a low RUL early in life". This was
+fixed with a minimum spread (`RUL_FPT_STD_FLOOR`); the experiment and the new
+numbers are in section 11.
 
 **Side effect check.** Gate forced on for PHM → PHM: validation MAE 0.199 vs
 0.198 and a dev gain too small to count (the same rule that rejected the trend
@@ -1313,22 +1331,24 @@ features). **Decision:** gate on for XJTU → PHM only
 
 ### Final result
 
-`python -m tools.rul compare --protocol XJTU_TO_PHM`, all 17 PHM bearings:
+`python -m tools.rul compare --protocol XJTU_TO_PHM`, all 17 PHM bearings.
+"Now" includes the sturdier detector from section 11.
 
-| Model | Start: MAE / R2 / rank | Now: MAE / R2 / rank |
-| --- | --- | --- |
-| Always guess 0.5 | 0.250 / 0.00 / — | 0.250 / 0.00 / — |
-| Linear regression | 0.311 / −0.83 / 0.74 | 0.219 / −0.02 / 0.90 |
-| **Random forest** | 0.216 / 0.15 / 0.53 | **0.181 / 0.39 / 0.82** |
-| Gradient boosting | 0.268 / −0.35 / 0.65 | 0.194 / 0.25 / 0.80 |
+| Model | Start: MAE / R2 / rank | After Fix 4 | Now: MAE / R2 / rank |
+| --- | --- | --- | --- |
+| Always guess 0.5 | 0.250 / 0.00 / — | | 0.250 / 0.00 / — |
+| Linear regression | 0.311 / −0.83 / 0.74 | 0.219 / −0.02 / 0.90 | 0.218 / −0.01 / 0.91 |
+| **Random forest** | 0.216 / 0.15 / 0.53 | 0.181 / 0.39 / 0.82 | **0.175 / 0.43 / 0.84** |
+| Gradient boosting | 0.268 / −0.35 / 0.65 | 0.194 / 0.25 / 0.80 | 0.192 / 0.28 / 0.82 |
 
 - XJTU → PHM now **beats training on PHM itself** (0.198 / 0.22 / 0.83), even
   though the model never saw a PHM bearing.
 - **PHM → PHM is exactly unchanged** (every new setting is off for it).
 - Numbers from the real code match the experiment script exactly.
+- Every prediction now comes with a 90% range (section 10).
 
-**Still weak** (random forest): Bearing2_7 (a 38 minute life, R2 −0.24),
-Bearing1_1 (rank 0.19), Bearing2_3 (rank 0.32). Bearings whose only warning is
+**Still weak** (random forest): Bearing2_7 (a 38 minute life, R2 −0.23),
+Bearing1_1 (rank 0.19), Bearing2_3 (rank 0.44). Bearings whose only warning is
 in the last 10% of life stay hard for any vibration-only model.
 
 ### The three weak bearings: why, and five more ideas (none adopted)
@@ -1353,8 +1373,8 @@ which bearings fail in an unusual way. A bearing may only be excluded for a
 data fault (dead sensor, corrupted file), by a rule fixed before looking at
 results.
 
-**Five ideas tested** on top of the final system (dev 0.197 / 0.33 / 0.78,
-test 0.172 / 0.42 / 0.85):
+**Five ideas tested** on top of the system after Fix 4 (dev 0.197 / 0.33 /
+0.78, test 0.172 / 0.42 / 0.85):
 
 | Idea | dev MAE / R2 / rank | test MAE / R2 / rank | Target bearing |
 | --- | --- | --- | --- |
@@ -1414,3 +1434,204 @@ here would each have "fixed" their target and made the system worse.
 5. **Small dev sets mislead.** Always confirm on data you did not choose with.
 6. **Simple beats clever when the data is small.** "Gate only" beat the full
    two-stage model.
+
+---
+
+## 10. Uncertainty ranges: how sure is the prediction?
+
+### Why
+
+A single number sounds more certain than it is. On Bearing2_3 the model says
+"RUL 0.23" at 25% of life, while the truth is 0.75. A factory planner who
+trusts that number stops a healthy machine. A range ("somewhere between 0.00
+and 0.64") is less impressive and far more useful, **if it is honest**.
+
+**Honest has a precise meaning:** a "90% range" must contain the true RUL about
+90% of the time. That share is called **coverage**, and it can be measured. A
+range that claims 90% and delivers 60% is worse than no range at all.
+
+### The idea (conformal prediction)
+
+1. Take bearings the model did NOT train on.
+2. Measure how wrong the model was on them.
+3. Use those errors as the range: "it was within ±0.42 on 90% of the snapshots
+   of bearings it had not seen, so that is what I promise for the next one."
+
+The errors already exist: leave-one-bearing-out cross validation predicts every
+training bearing with a model that never saw it. Every bearing is counted
+equally (200 points each), so a 42 hour bearing does not outweigh a 1 hour one.
+
+### What was tested (`results/experiments/uncertainty.py`)
+
+Two shapes of range and two sources of errors, target 90%:
+
+| Method | dev coverage | test coverage | Worst bearing | Average width |
+| --- | --- | --- | --- | --- |
+| **Fixed width, errors from XJTU cross validation** | **91%** | **95%** | 73% | 0.70 |
+| Width depending on the predicted value, XJTU cross validation | 83% | 91% | 62% | 0.69 |
+| Fixed width, errors from the 6 PHM dev bearings | — | 95% | 75% | 0.69 |
+| Width depending on the predicted value, PHM dev bearings | — | 86% | 37% | 0.61 |
+
+**What the numbers say.**
+- **The simplest method keeps its promise.** One fixed width from XJTU cross
+  validation covers 91% on dev and 95% on test — without ever seeing a PHM
+  bearing. That is not obvious: the errors were measured on a different machine.
+- **The cleverer method breaks it.** Making the width depend on the predicted
+  value sounds better (errors differ between "looks new" and "looks worn"), but
+  it splits the errors into 5 groups, each estimated from less data, and it
+  learned patterns that are specific to XJTU. Coverage fell to 83% on dev and
+  to 37–62% on single bearings. **Rejected**, chosen on dev.
+- **Calibrating on PHM bearings gave nothing extra**: same coverage, same
+  width. So the range does not need data from the target machine.
+
+### The result, and how to read it
+
+From the real code (`python -m tools.rul train`, then `evaluate`):
+
+| Protocol | Range | Coverage on validation bearings | Worst bearing |
+| --- | --- | --- | --- |
+| XJTU → PHM | prediction ± 0.42 | 94% of snapshots (promise: 90%) | Bearing1_1: 73% |
+| PHM → PHM | prediction ± 0.46 | 91% | Bearing2_7: 69% |
+
+`tools.rul predict` now prints the range next to every prediction:
+
+```
+  time h   % life predicted RUL    90% range
+    0.66      10%          0.69  0.28 - 1.00
+    3.30      50%          0.37  0.00 - 0.78
+    4.94      75%          0.17  0.00 - 0.58
+```
+
+- **The range is wide: about 0.70 of the whole scale.** That is not a flaw of
+  the method; it is the model's real precision, stated honestly. MAE 0.175 is
+  the AVERAGE error; one error in ten is larger than 0.42.
+- **The useful end is the top.** "0.00 – 0.58" means: with 90% confidence less
+  than 58% of life is left. A planner can act on the upper bound falling.
+- **90% is an average over bearings.** On Bearing1_1 the truth was inside only
+  73% of the time, because the model is wrong in the same direction for a long
+  stretch there. No range fixes a bearing the model misreads.
+- **A narrower range needs a better model**, not a better range method. If the
+  model improves, cross validation errors shrink and the range narrows by
+  itself — it is recomputed at every training.
+
+### Where it lives in the code
+
+| Piece | Where |
+| --- | --- |
+| collect honest errors during cross validation | `leave_one_run_out(..., collect=...)` |
+| build the range, store it in the model file | `RULModel.set_interval`, saved as `interval` |
+| range for a prediction | `RULModel.predict_interval` |
+| coverage and width per bearing | `interval_metrics`, shown by `tools.rul evaluate` |
+| range in the output | `tools.rul predict`, and `rul_low` / `rul_high` in the `--curves` CSV |
+| the level | `RUL_INTERVAL_LEVEL` in `config.py` (0.90) |
+
+A model trained on fewer than 3 bearings, or saved before ranges existed, has
+no range; the tools say so instead of inventing one.
+
+---
+
+## 11. Two weaknesses the tests found, and how they were fixed
+
+Writing the tests (1 Oct) exposed two real weaknesses. Both were first recorded
+as "expected failure" tests so they stayed visible, then fixed. Both tests are
+now ordinary passing tests.
+
+### 11.1 The anomaly engine missed faults in a single feature
+
+**Observe.** A test moved ONE feature far from healthy and expected an alarm:
+
+| Fault in the test | Detected by the forest |
+| --- | --- |
+| kurtosis alone, 15 standard deviations out | 72% |
+| RMS alone, 10 standard deviations out | 67% |
+| RMS and kurtosis together | 100% |
+
+**Explain.** An Isolation Forest scores a window by how easy it is to separate
+from the healthy crowd using random splits on random features. If only one of
+many features is unusual, most splits look at the normal ones, and the window
+still looks fairly ordinary. One loud signal is diluted by many quiet ones.
+(The same thing had already happened with cooling faults, which is why the
+thermal check exists.)
+
+**Idea.** Keep the forest for the overall pattern and add a second, simple
+check: alarm when ANY single feature is extremely far from its healthy value
+(its robust z score). The two checks catch different things.
+
+**The risk, and how the threshold is set.** With 60–100 features, one of them is
+far out by chance fairly often. So the threshold is not a fixed number: it is
+the 99th percentile of "the largest z of any feature" on held-out healthy data
+of that setup, and never below 6. **Both values were fixed before looking at
+any result**, because these datasets have no dev/test split to choose on —
+tuning them on the reported numbers would be fitting the test.
+
+**Result** (`python -m tools.mechanical_anomaly train`, real SEU and CWRU data):
+
+| Setup | Before | After |
+| --- | --- | --- |
+| CWRU load 0, ball fault (the known weak spot) | 64.8% detected | **96.3%** |
+| CWRU load 0, inner race fault | 96.3% | 100% |
+| Every other fault | unchanged (96–100%) | unchanged |
+| False alarms, SEU bearing 30-2 | 11.1% | 12.5% |
+| False alarms, SEU gear 20-0 | 2.8% | 4.2% |
+| False alarms, SEU gear 30-2 | 9.7% | 11.1% |
+| False alarms, all CWRU setups and SEU bearing 20-0 | unchanged | unchanged |
+| Partner pipeline (synthetic): backlash / false alarms | 22.4% / 2.0% | 23.7% / 2.6% |
+
+**Decision: kept** (`ANOMALY_FEATURE_CHECK = True`). The weakest known fault
+went from 65% to 96%, for about one extra false alarm per 72 healthy windows on
+three setups. The CWRU load 3 false alarms (22%) are unchanged: they come from
+the forest, not from this check.
+
+### 11.2 The degradation detector fired on noise
+
+**Observe.** A test built a bearing that never wears and expected the detector
+to stay quiet. It fired in 6 of 6 trials, at snapshot 21–85 of 200.
+
+**Explain.** The detector learns "normal" from the first 10 minutes: 11
+snapshots at one per minute. The spread of 11 smoothed values is far smaller
+than the real spread, so later ordinary noise is "5 standard deviations above
+normal". This also explained why it fired at 10–20% of life on PHM.
+
+**Ideas tested** (on top of the gate from Fix 4; the last column is the new
+correctness check):
+
+| Variant | dev MAE / R2 / rank | test MAE / R2 / rank | Fires on a bearing that never wears |
+| --- | --- | --- | --- |
+| Before (5 std) | 0.197 / 0.33 / 0.78 | 0.172 / 0.42 / 0.85 | 6 of 6 |
+| 8 std | 0.202 / 0.31 / 0.78 | 0.153 / 0.53 / 0.87 | 1 of 6 |
+| 12 std | 0.216 / 0.21 / 0.76 | 0.163 / 0.48 / 0.87 | 0 of 6 |
+| **Minimum spread 5%** | 0.205 / 0.29 / 0.78 | 0.158 / 0.51 / 0.87 | **0 of 6** |
+| Minimum spread 10% | 0.213 / 0.24 / 0.78 | 0.172 / 0.44 / 0.86 | 0 of 6 |
+| 30 minute normal window | 0.205 / 0.24 / 0.81 | 0.193 / 0.30 / 0.89 | 1 of 6 |
+| 30 minute window + minimum spread 5% | 0.209 / 0.27 / 0.79 | 0.172 / 0.43 / 0.88 | 0 of 6 |
+
+**How the decision was made — this one is subtle.**
+- On dev alone, nothing beats the old detector; every variant is slightly
+  worse, by amounts treated as noise everywhere else in this guide.
+- On test, several variants are much better (MAE 0.172 → 0.153). **Choosing by
+  that would be cheating**: the test bearings are not for choosing.
+- There is a third criterion that does not depend on PHM scores at all: **a
+  detector that fires on a bearing that never wears is wrong.** That is a
+  property of the detector, checked on synthetic data.
+- So: among the variants that pass that check (0 of 6), take the best on dev.
+  That is "minimum spread 5%". Its dev difference from the old detector
+  (MAE +0.008) is within noise, so it fixes a proven defect at no clear cost.
+  The test bearings were looked at only afterwards — and agree.
+
+**Result** (real code, all 17 PHM bearings, random forest): MAE 0.181 → 0.175,
+R2 0.39 → 0.43, rank 0.82 → 0.84. PHM → PHM unchanged (it does not use the
+gate). Bearing2_3 improved a little (rank 0.32 → 0.44).
+
+**Why a minimum spread and not a higher bar.** "8 std" still fired once, and
+"12 std" made dev clearly worse: a multiple of a too-small number is still
+unreliable. The minimum spread attacks the cause — the spread estimate itself.
+
+### What both fixes have in common
+
+1. **A test asked a simple question the experiments never did** ("what happens
+   on a bearing that never wears?", "what if only one feature changes?").
+   Averages over real bearings hid both problems.
+2. **Each weakness was written down before it was fixed**, as an expected
+   failure, so it could not be forgotten or hidden.
+3. **Each fix has a test that fails without it.** Switch the minimum spread or
+   the single feature check off and a test goes red again.

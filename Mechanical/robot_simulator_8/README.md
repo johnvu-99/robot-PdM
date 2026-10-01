@@ -132,7 +132,7 @@ pip install -r requirements-test.txt
 python -m pytest tests -q
 ```
 
-About 50 tests, a few seconds, no downloaded datasets needed: they build small
+About 65 tests, a few seconds, no downloaded datasets needed: they build small
 synthetic bearings and dataset folders, and write only to a temporary folder.
 They run automatically on every push (GitHub Actions, `.github/workflows/tests.yml`).
 
@@ -140,13 +140,13 @@ They run automatically on every push (GitHub Actions, `.github/workflows/tests.y
 | --- | --- |
 | `tests/test_signal_features.py` | features give textbook values on known signals (a sine has RMS = A/√2, kurtosis 1.5) |
 | `tests/test_adapters.py` | the right files are found, in the right order, with labels from 1 (new) to 0 (failed); PHM `Test_set` is never used |
-| `tests/test_rul_model.py` | no feature or smoothing uses the future; a bearing can never be in train and test; old model files still load |
+| `tests/test_rul_model.py` | no feature or smoothing uses the future; a bearing can never be in train and test; old model files still load; a bearing that never wears is never flagged; the uncertainty range covers what it promises |
 | `tests/test_protocols.py` | each protocol trains and tests on the bearings it claims; train then evaluate runs end to end |
 | `tests/test_anomaly_engine.py` | healthy data gives few false alarms; a fault is detected and the changed feature is named |
 
-Two tests are marked as expected failures. They record known weaknesses, so they
-stay visible: a fault that changes a single feature is only caught about 70% of
-the time, and the degradation detector can fire on noise (CODE_GUIDE section 9).
+Two weaknesses were first recorded here as expected failures (a fault in a
+single feature was often missed; the degradation detector fired on noise). Both
+are fixed, and each fix has a test that fails without it (CODE_GUIDE section 11).
 
 ## Run
 
@@ -956,6 +956,23 @@ that point. Both apply to XJTU -> PHM only; PHM -> PHM is unchanged.
 XJTU -> PHM now beats training on PHM itself (0.198 / 0.22 / 0.83). Every
 experiment, including the rejected ones, and the reasoning behind each is in
 [CODE_GUIDE_MECHANICAL.md](CODE_GUIDE_MECHANICAL.md), section 9.
+
+**Update 1 Oct: sturdier detector, uncertainty ranges, single feature check.**
+
+- The degradation detector fired on pure noise (found by the tests). With a
+  minimum spread (`RUL_FPT_STD_FLOOR`) it no longer does, and the random forest
+  reaches **MAE 0.175, R2 0.43, rank 0.84** on the 17 PHM bearings.
+- Every prediction now has a **90% range**: prediction +/- 0.42 for XJTU -> PHM,
+  built from the errors on held out bearings. Measured coverage on PHM: 94% of
+  snapshots (worst bearing 73%). `tools.rul predict` prints it; `evaluate`
+  reports coverage. The range is wide (about 0.70 of the scale) because that is
+  the model's real precision.
+- The anomaly engine also alarms when one single feature is extremely far from
+  healthy (`ANOMALY_FEATURE_CHECK`): the smallest CWRU ball fault at load 0 went
+  from 64.8% to 96.3% detected, for about +1.4 points of false alarms on three
+  SEU setups.
+
+Explained in CODE_GUIDE sections 10 and 11.
 
 Forcing the prediction to only go down (`RUL_MONOTONE_PREDICTION`) was tested
 and left off: it pushes rank to 0.94 - 1.00 for every model, even ones with

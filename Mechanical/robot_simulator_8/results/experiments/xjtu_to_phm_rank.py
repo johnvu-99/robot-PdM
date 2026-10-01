@@ -132,6 +132,13 @@ VARIANTS = {
     "b2_fpt_both":       dict(post=post_ema(900.0), two_stage=dict(k=5.0, gate_only=True, need_all=True), config=dict(RUL_LOUDNESS_REFERENCE="QUIETEST")),
     "b3_kurt_conf_02":   dict(post=post_ema(900.0), two_stage=dict(k=5.0, gate_only=True), config=dict(RUL_LOUDNESS_REFERENCE="QUIETEST", RUL_KURTOSIS_NEEDS_GROWTH=0.2)),
     "b3_kurt_conf_05":   dict(post=post_ema(900.0), two_stage=dict(k=5.0, gate_only=True), config=dict(RUL_LOUDNESS_REFERENCE="QUIETEST", RUL_KURTOSIS_NEEDS_GROWTH=0.5)),
+    # Sturdier degradation detector (the gate fired on pure noise). Current = "f4_k5_gate_only".
+    "g_k8":              dict(post=post_ema(900.0), two_stage=dict(k=8.0, gate_only=True), config=dict(RUL_LOUDNESS_REFERENCE="QUIETEST")),
+    "g_k12":             dict(post=post_ema(900.0), two_stage=dict(k=12.0, gate_only=True), config=dict(RUL_LOUDNESS_REFERENCE="QUIETEST")),
+    "g_floor05":         dict(post=post_ema(900.0), two_stage=dict(k=5.0, gate_only=True, std_floor=0.05), config=dict(RUL_LOUDNESS_REFERENCE="QUIETEST")),
+    "g_floor10":         dict(post=post_ema(900.0), two_stage=dict(k=5.0, gate_only=True, std_floor=0.10), config=dict(RUL_LOUDNESS_REFERENCE="QUIETEST")),
+    "g_win1800":         dict(post=post_ema(900.0), two_stage=dict(k=5.0, gate_only=True, healthy_s=1800.0), config=dict(RUL_LOUDNESS_REFERENCE="QUIETEST")),
+    "g_win1800_floor05": dict(post=post_ema(900.0), two_stage=dict(k=5.0, gate_only=True, healthy_s=1800.0, std_floor=0.05), config=dict(RUL_LOUDNESS_REFERENCE="QUIETEST")),
     "f2_shape_trend":    dict(post=post_ema(900.0), config=dict(RUL_LOUDNESS_REFERENCE="QUIETEST", RUL_DROP_LOUDNESS_FEATURES=True, RUL_TREND_FEATURES=True)),
 }
 
@@ -141,7 +148,8 @@ VARIANTS = {
 FPT_SIGNALS = ("rms_ema_fast", "kurtosis_ema_fast")
 
 
-def detect_fpt(run, matrix, names, k, sustain_s=120.0, healthy_s=600.0, signals=FPT_SIGNALS, need_all=False):
+def detect_fpt(run, matrix, names, k, sustain_s=120.0, healthy_s=600.0, signals=FPT_SIGNALS, need_all=False,
+               std_floor=0.0):
     """
     Index of the first snapshot where degradation has started, causal. Normal
     range = the first healthy_s seconds of this run; degradation = any signal
@@ -154,7 +162,7 @@ def detect_fpt(run, matrix, names, k, sustain_s=120.0, healthy_s=600.0, signals=
         hit = np.zeros(len(times), bool)
         for channel in ("horizontal", "vertical"):
             x = matrix[:, names.index("%s_%s" % (channel, signal))]
-            mean, std = np.mean(x[healthy]), max(np.std(x[healthy]), 1e-6)
+            mean, std = np.mean(x[healthy]), max(np.std(x[healthy]), 1e-6, std_floor)
             hit |= x > mean + k * std
         per_signal.append(hit)
     above = np.all(per_signal, axis=0) if need_all else np.any(per_signal, axis=0)
@@ -173,9 +181,21 @@ def detect_fpt(run, matrix, names, k, sustain_s=120.0, healthy_s=600.0, signals=
 class TwoStage(object):
     """Stage 2 trained on the degradation phase only; constant before the FPT."""
 
-    def __init__(self, k, gate_only=False, signals=FPT_SIGNALS, need_all=False):
+    def __init__(self, k, gate_only=False, signals=FPT_SIGNALS, need_all=False, std_floor=0.0,
+                 healthy_s=600.0):
         self.k, self.gate_only = k, gate_only
-        self.fpt_options = dict(signals=tuple(signals), need_all=need_all)
+        self.fpt_options = dict(signals=tuple(signals), need_all=need_all, std_floor=std_floor,
+                                healthy_s=healthy_s)
+
+    def noise_triggers(self, trials=6):
+        """How many synthetic bearings that NEVER wear are flagged anyway."""
+        from tests.conftest import make_run
+        count = 0
+        for seed in range(trials):
+            run = make_run("never_wears_%d" % seed, wear_from=2.0, seed=seed)
+            matrix, names, _ = rul_model.rul_features(run)
+            count += detect_fpt(run, matrix, names, self.k, **self.fpt_options) < len(run["times"])
+        return count, trials
 
     def fit(self, runs):
         xs, ys, at_fpt = [], [], []
@@ -196,7 +216,7 @@ class TwoStage(object):
         fpt = detect_fpt(run, matrix, names, self.k, **self.fpt_options)
         prediction = np.clip(self.pipeline.predict(matrix), 0.0, 1.0)
         prediction[:fpt] = np.maximum(prediction[:fpt], self.before_fpt)
-        run.setdefault("_fpt_life", {})[self.k] = float(run["life_fraction"][min(fpt, len(matrix) - 1)])
+        run["_fpt_life"] = float(run["life_fraction"][min(fpt, len(matrix) - 1)]) if fpt < len(matrix) else 1.0
         return prediction, health
 
 
@@ -241,9 +261,10 @@ def main(names):
                  for k in ("dev", "test", "all")]
         print("%-18s | %-26s | %-26s | %-26s" % (name, cells[0], cells[1], cells[2]))
         if two_stage:
-            lives = [r.get("_fpt_life", {}).get(two_stage["k"], 1.0) for r in test]
+            lives = [r.get("_fpt_life", 1.0) for r in test]
             print("   PHM degradation detected at life %s (1.00 = never)"
                   % " ".join("%.2f" % v for v in lives))
+            print("   fires on a bearing that never wears: %d of %d" % models[key].noise_triggers())
         if os.environ.get("PER_BEARING"):
             for s, m in rows:
                 print("     %-4s %-16s MAE %.3f R2 %5.2f rank %5.2f"

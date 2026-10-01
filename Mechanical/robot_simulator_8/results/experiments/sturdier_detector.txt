@@ -1,0 +1,148 @@
+variant            | dev (6) MAE R2 rank        | test (11) MAE R2 rank      | all (17) MAE R2 rank      
+   f4_k5_gate_only: training FPT at RUL 0.72 (median), before-FPT output 0.72
+f4_k5_gate_only    | 0.197  0.33  0.78          | 0.172  0.42  0.85          | 0.181  0.39  0.82         
+   PHM degradation detected at life 0.14 0.08 0.13 0.23 0.23 0.07 0.41 0.11 0.05 0.21 0.38 0.05 0.35 0.03 0.11 0.51 0.18 (1.00 = never)
+   fires on a bearing that never wears: 6 of 6
+     dev  PHM_Bearing1_1   MAE 0.262 R2 -0.21 rank  0.19
+     dev  PHM_Bearing1_2   MAE 0.172 R2  0.52 rank  1.00
+     dev  PHM_Bearing2_1   MAE 0.207 R2  0.28 rank  0.92
+     dev  PHM_Bearing2_2   MAE 0.163 R2  0.58 rank  0.70
+     dev  PHM_Bearing3_1   MAE 0.179 R2  0.52 rank  1.00
+     dev  PHM_Bearing3_2   MAE 0.202 R2  0.28 rank  0.89
+     test PHM_Bearing1_3   MAE 0.103 R2  0.84 rank  0.90
+     test PHM_Bearing1_4   MAE 0.134 R2  0.67 rank  0.98
+     test PHM_Bearing1_5   MAE 0.191 R2  0.44 rank  0.88
+     test PHM_Bearing1_6   MAE 0.243 R2 -0.04 rank  0.86
+     test PHM_Bearing1_7   MAE 0.131 R2  0.70 rank  0.83
+     test PHM_Bearing2_3   MAE 0.248 R2 -0.05 rank  0.32
+     test PHM_Bearing2_4   MAE 0.123 R2  0.68 rank  0.98
+     test PHM_Bearing2_5   MAE 0.248 R2 -0.02 rank  0.57
+     test PHM_Bearing2_6   MAE 0.103 R2  0.79 rank  1.00
+     test PHM_Bearing2_7   MAE 0.285 R2 -0.24 rank  1.00
+     test PHM_Bearing3_3   MAE 0.082 R2  0.87 rank  0.98
+   g_k8: training FPT at RUL 0.62 (median), before-FPT output 0.62
+g_k8               | 0.202  0.31  0.78          | 0.153  0.53  0.87          | 0.170  0.45  0.84         
+   PHM degradation detected at life 0.14 0.08 0.13 0.23 0.28 0.07 0.43 0.38 0.06 0.65 0.38 0.13 0.36 0.03 0.63 0.51 0.19 (1.00 = never)
+   fires on a bearing that never wears: 1 of 6
+     dev  PHM_Bearing1_1   MAE 0.267 R2 -0.23 rank  0.19
+     dev  PHM_Bearing1_2   MAE 0.173 R2  0.52 rank  1.00
+     dev  PHM_Bearing2_1   MAE 0.213 R2  0.24 rank  0.91
+     dev  PHM_Bearing2_2   MAE 0.178 R2  0.52 rank  0.68
+     dev  PHM_Bearing3_1   MAE 0.179 R2  0.52 rank  1.00
+     dev  PHM_Bearing3_2   MAE 0.203 R2  0.27 rank  0.89
+     test PHM_Bearing1_3   MAE 0.111 R2  0.81 rank  0.90
+     test PHM_Bearing1_4   MAE 0.079 R2  0.90 rank  1.00
+     test PHM_Bearing1_5   MAE 0.192 R2  0.44 rank  0.88
+     test PHM_Bearing1_6   MAE 0.109 R2  0.81 rank  0.98
+     test PHM_Bearing1_7   MAE 0.156 R2  0.60 rank  0.83
+     test PHM_Bearing2_3   MAE 0.227 R2  0.14 rank  0.46
+     test PHM_Bearing2_4   MAE 0.107 R2  0.70 rank  0.98
+     test PHM_Bearing2_5   MAE 0.248 R2 -0.02 rank  0.57
+     test PHM_Bearing2_6   MAE 0.087 R2  0.86 rank  1.00
+     test PHM_Bearing2_7   MAE 0.284 R2 -0.23 rank  1.00
+     test PHM_Bearing3_3   MAE 0.081 R2  0.87 rank  0.98
+   g_k12: training FPT at RUL 0.41 (median), before-FPT output 0.41
+g_k12              | 0.216  0.21  0.76          | 0.163  0.48  0.87          | 0.182  0.38  0.83         
+   PHM degradation detected at life 0.14 0.13 0.13 0.24 0.95 0.07 0.56 0.76 0.06 0.65 0.40 0.13 0.36 0.04 0.63 0.51 0.72 (1.00 = never)
+   fires on a bearing that never wears: 0 of 6
+     dev  PHM_Bearing1_1   MAE 0.279 R2 -0.32 rank  0.18
+     dev  PHM_Bearing1_2   MAE 0.170 R2  0.53 rank  1.00
+     dev  PHM_Bearing2_1   MAE 0.224 R2  0.16 rank  0.91
+     dev  PHM_Bearing2_2   MAE 0.204 R2  0.38 rank  0.62
+     dev  PHM_Bearing3_1   MAE 0.216 R2  0.26 rank  1.00
+     dev  PHM_Bearing3_2   MAE 0.204 R2  0.26 rank  0.88
+     test PHM_Bearing1_3   MAE 0.132 R2  0.75 rank  0.91
+     test PHM_Bearing1_4   MAE 0.131 R2  0.71 rank  1.00
+     test PHM_Bearing1_5   MAE 0.195 R2  0.42 rank  0.88
+     test PHM_Bearing1_6   MAE 0.135 R2  0.69 rank  0.98
+     test PHM_Bearing1_7   MAE 0.202 R2  0.41 rank  0.83
+     test PHM_Bearing2_3   MAE 0.240 R2  0.04 rank  0.39
+     test PHM_Bearing2_4   MAE 0.106 R2  0.70 rank  0.98
+     test PHM_Bearing2_5   MAE 0.248 R2 -0.02 rank  0.57
+     test PHM_Bearing2_6   MAE 0.029 R2  0.98 rank  1.00
+     test PHM_Bearing2_7   MAE 0.284 R2 -0.23 rank  1.00
+     test PHM_Bearing3_3   MAE 0.097 R2  0.81 rank  0.98
+   g_floor05: training FPT at RUL 0.54 (median), before-FPT output 0.54
+g_floor05          | 0.205  0.29  0.78          | 0.158  0.51  0.87          | 0.175  0.43  0.84         
+   PHM degradation detected at life 0.15 0.08 0.13 0.25 0.23 0.07 0.41 0.76 0.06 0.67 0.45 0.13 0.37 0.05 0.63 0.51 0.21 (1.00 = never)
+   fires on a bearing that never wears: 0 of 6
+     dev  PHM_Bearing1_1   MAE 0.271 R2 -0.26 rank  0.19
+     dev  PHM_Bearing1_2   MAE 0.173 R2  0.52 rank  1.00
+     dev  PHM_Bearing2_1   MAE 0.218 R2  0.21 rank  0.91
+     dev  PHM_Bearing2_2   MAE 0.188 R2  0.48 rank  0.67
+     dev  PHM_Bearing3_1   MAE 0.179 R2  0.52 rank  1.00
+     dev  PHM_Bearing3_2   MAE 0.203 R2  0.27 rank  0.89
+     test PHM_Bearing1_3   MAE 0.126 R2  0.78 rank  0.89
+     test PHM_Bearing1_4   MAE 0.132 R2  0.72 rank  1.00
+     test PHM_Bearing1_5   MAE 0.194 R2  0.42 rank  0.88
+     test PHM_Bearing1_6   MAE 0.112 R2  0.80 rank  0.98
+     test PHM_Bearing1_7   MAE 0.166 R2  0.56 rank  0.84
+     test PHM_Bearing2_3   MAE 0.232 R2  0.10 rank  0.44
+     test PHM_Bearing2_4   MAE 0.106 R2  0.70 rank  0.98
+     test PHM_Bearing2_5   MAE 0.245 R2  0.01 rank  0.60
+     test PHM_Bearing2_6   MAE 0.061 R2  0.93 rank  1.00
+     test PHM_Bearing2_7   MAE 0.284 R2 -0.23 rank  1.00
+     test PHM_Bearing3_3   MAE 0.081 R2  0.87 rank  0.98
+   g_floor10: training FPT at RUL 0.29 (median), before-FPT output 0.29
+g_floor10          | 0.213  0.24  0.78          | 0.172  0.44  0.86          | 0.187  0.37  0.83         
+   PHM degradation detected at life 0.15 0.08 0.13 0.32 0.95 0.07 0.41 0.76 0.37 0.67 0.53 0.13 0.45 0.06 0.63 0.51 0.75 (1.00 = never)
+   fires on a bearing that never wears: 0 of 6
+     dev  PHM_Bearing1_1   MAE 0.280 R2 -0.33 rank  0.18
+     dev  PHM_Bearing1_2   MAE 0.173 R2  0.52 rank  1.00
+     dev  PHM_Bearing2_1   MAE 0.224 R2  0.16 rank  0.91
+     dev  PHM_Bearing2_2   MAE 0.192 R2  0.46 rank  0.71
+     dev  PHM_Bearing3_1   MAE 0.202 R2  0.38 rank  1.00
+     dev  PHM_Bearing3_2   MAE 0.205 R2  0.26 rank  0.88
+     test PHM_Bearing1_3   MAE 0.158 R2  0.65 rank  0.89
+     test PHM_Bearing1_4   MAE 0.145 R2  0.62 rank  0.98
+     test PHM_Bearing1_5   MAE 0.194 R2  0.43 rank  0.88
+     test PHM_Bearing1_6   MAE 0.181 R2  0.46 rank  0.98
+     test PHM_Bearing1_7   MAE 0.206 R2  0.38 rank  0.87
+     test PHM_Bearing2_3   MAE 0.247 R2 -0.03 rank  0.34
+     test PHM_Bearing2_4   MAE 0.106 R2  0.70 rank  0.98
+     test PHM_Bearing2_5   MAE 0.245 R2  0.02 rank  0.61
+     test PHM_Bearing2_6   MAE 0.050 R2  0.96 rank  1.00
+     test PHM_Bearing2_7   MAE 0.284 R2 -0.23 rank  1.00
+     test PHM_Bearing3_3   MAE 0.082 R2  0.87 rank  0.98
+   g_win1800: training FPT at RUL 0.62 (median), before-FPT output 0.62
+g_win1800          | 0.205  0.24  0.81          | 0.193  0.30  0.89          | 0.197  0.28  0.86         
+   PHM degradation detected at life 0.14 0.95 0.31 0.23 0.95 0.76 0.37 0.76 0.94 0.15 0.15 0.13 0.35 0.10 0.63 1.00 0.70 (1.00 = never)
+   fires on a bearing that never wears: 1 of 6
+     dev  PHM_Bearing1_1   MAE 0.268 R2 -0.24 rank  0.19
+     dev  PHM_Bearing1_2   MAE 0.213 R2  0.08 rank  1.00
+     dev  PHM_Bearing2_1   MAE 0.135 R2  0.73 rank  0.99
+     dev  PHM_Bearing2_2   MAE 0.180 R2  0.51 rank  0.67
+     dev  PHM_Bearing3_1   MAE 0.265 R2 -0.22 rank  1.00
+     dev  PHM_Bearing3_2   MAE 0.167 R2  0.56 rank  1.00
+     test PHM_Bearing1_3   MAE 0.126 R2  0.77 rank  0.89
+     test PHM_Bearing1_4   MAE 0.142 R2  0.65 rank  1.00
+     test PHM_Bearing1_5   MAE 0.231 R2  0.08 rank  1.00
+     test PHM_Bearing1_6   MAE 0.270 R2 -0.23 rank  0.85
+     test PHM_Bearing1_7   MAE 0.209 R2  0.37 rank  0.83
+     test PHM_Bearing2_3   MAE 0.227 R2  0.14 rank  0.46
+     test PHM_Bearing2_4   MAE 0.105 R2  0.70 rank  0.98
+     test PHM_Bearing2_5   MAE 0.224 R2  0.21 rank  0.80
+     test PHM_Bearing2_6   MAE 0.085 R2  0.87 rank  1.00
+     test PHM_Bearing2_7   MAE 0.326 R2 -0.73 rank  1.00
+     test PHM_Bearing3_3   MAE 0.180 R2  0.48 rank  0.98
+   g_win1800_floor05: training FPT at RUL 0.31 (median), before-FPT output 0.31
+g_win1800_floor05  | 0.209  0.27  0.79          | 0.172  0.43  0.88          | 0.186  0.37  0.85         
+   PHM degradation detected at life 0.15 0.95 0.31 0.25 0.95 0.76 0.37 0.76 0.94 0.67 0.45 0.13 0.37 0.12 0.63 1.00 0.72 (1.00 = never)
+   fires on a bearing that never wears: 0 of 6
+     dev  PHM_Bearing1_1   MAE 0.280 R2 -0.33 rank  0.18
+     dev  PHM_Bearing1_2   MAE 0.170 R2  0.55 rank  1.00
+     dev  PHM_Bearing2_1   MAE 0.200 R2  0.37 rank  0.98
+     dev  PHM_Bearing2_2   MAE 0.203 R2  0.38 rank  0.62
+     dev  PHM_Bearing3_1   MAE 0.204 R2  0.36 rank  1.00
+     dev  PHM_Bearing3_2   MAE 0.200 R2  0.30 rank  0.95
+     test PHM_Bearing1_3   MAE 0.158 R2  0.65 rank  0.89
+     test PHM_Bearing1_4   MAE 0.145 R2  0.62 rank  0.98
+     test PHM_Bearing1_5   MAE 0.193 R2  0.43 rank  0.90
+     test PHM_Bearing1_6   MAE 0.172 R2  0.51 rank  0.98
+     test PHM_Bearing1_7   MAE 0.215 R2  0.33 rank  0.83
+     test PHM_Bearing2_3   MAE 0.246 R2 -0.02 rank  0.35
+     test PHM_Bearing2_4   MAE 0.106 R2  0.70 rank  0.98
+     test PHM_Bearing2_5   MAE 0.239 R2  0.08 rank  0.80
+     test PHM_Bearing2_6   MAE 0.044 R2  0.97 rank  1.00
+     test PHM_Bearing2_7   MAE 0.297 R2 -0.38 rank  1.00
+     test PHM_Bearing3_3   MAE 0.082 R2  0.87 rank  0.98

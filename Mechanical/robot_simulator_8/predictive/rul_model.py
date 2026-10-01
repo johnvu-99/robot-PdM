@@ -138,7 +138,8 @@ def detect_fpt(run, matrix, names):
     First predicting time: index of the first snapshot where degradation has
     started, using only past snapshots. Normal range = this run's first
     RUL_FPT_HEALTHY_S seconds; degradation = any FPT signal above
-    mean + RUL_FPT_K * std for RUL_FPT_SUSTAIN_S seconds. len(run) if never.
+    mean + RUL_FPT_K * std for RUL_FPT_SUSTAIN_S seconds, where std is never
+    taken below RUL_FPT_STD_FLOOR. len(run) if never.
     """
     times = np.asarray(run["times"], dtype=np.float64) - float(run["times"][0])
     healthy = times <= config.RUL_FPT_HEALTHY_S
@@ -149,7 +150,8 @@ def detect_fpt(run, matrix, names):
             if name not in names:
                 continue
             x = matrix[:, names.index(name)]
-            mean, std = np.mean(x[healthy]), max(np.std(x[healthy]), 1e-6)
+            mean = np.mean(x[healthy])
+            std = max(np.std(x[healthy]), 1e-6, config.RUL_FPT_STD_FLOOR)
             above |= x > mean + config.RUL_FPT_K * std
     start = None
     for i in range(len(times)):
@@ -228,6 +230,7 @@ class RULModel(object):
         # Model files saved before this setting existed used the START reference.
         self.loudness_reference = "START"
         self.fpt_floor = None           # None = no gate (also for older files)
+        self.interval = None            # None = no uncertainty range (also for older files)
 
     def fit(self, runs, loudness_reference=None, fpt_gate=False):
         reference = loudness_reference or config.RUL_LOUDNESS_REFERENCE
@@ -259,6 +262,31 @@ class RULModel(object):
             prediction[:fpt] = np.maximum(prediction[:fpt], self.fpt_floor)
         return postprocess_prediction(prediction, run, self.training_dataset), health
 
+    def set_interval(self, pairs, level=None):
+        """
+        pairs: (prediction, truth) per bearing, from bearings this kind of
+        model did NOT train on (leave one bearing out). The range is
+        prediction +/- the level quantile of the absolute error.
+        """
+        level = config.RUL_INTERVAL_LEVEL if level is None else level
+        errors = []
+        for prediction, truth in pairs:
+            index = np.linspace(0, len(truth) - 1, config.RUL_INTERVAL_POINTS_PER_RUN).round().astype(int)
+            errors.append(np.abs(np.asarray(truth)[index] - np.asarray(prediction)[index]))
+        if not errors:
+            self.interval = None
+            return self
+        self.interval = {"level": float(level), "bearings": len(errors),
+                         "half_width": float(np.quantile(np.concatenate(errors), level))}
+        return self
+
+    def predict_interval(self, prediction):
+        """(low, high) around a predicted RUL curve, or None if the model has no range."""
+        if not self.interval:
+            return None
+        half = self.interval["half_width"]
+        return np.clip(prediction - half, 0.0, 1.0), np.clip(prediction + half, 0.0, 1.0)
+
     def save(self, path):
         directory = os.path.dirname(path)
         if directory:
@@ -268,7 +296,7 @@ class RULModel(object):
                      "training_dataset": self.training_dataset, "created": self.created,
                      "target": "RUL_fraction",
                      "loudness_reference": self.loudness_reference,
-                     "fpt_floor": self.fpt_floor}, path, compress=3)
+                     "fpt_floor": self.fpt_floor, "interval": self.interval}, path, compress=3)
         return path
 
     @classmethod
@@ -284,6 +312,7 @@ class RULModel(object):
         model.created = data["created"]
         model.loudness_reference = data.get("loudness_reference", "START")
         model.fpt_floor = data.get("fpt_floor")
+        model.interval = data.get("interval")
         return model
 
 
@@ -325,11 +354,18 @@ def run_metrics(run, prediction):
     return metrics
 
 
+def interval_metrics(run, low, high):
+    """Coverage = share of snapshots whose true RUL is inside the range; width = its average size."""
+    truth = run["rul_fraction"]
+    return {"coverage": float(np.mean((truth >= low) & (truth <= high))),
+            "interval_width": float(np.mean(high - low))}
+
+
 def aggregate(metrics_list):
     if not metrics_list:
         return {}
     keys = ("mae", "rmse", "r2", "rank_correlation", "mae_percent_life",
-            "late_life_time_error_percent_life")
+            "late_life_time_error_percent_life", "coverage", "interval_width")
     out = {"runs": len(metrics_list)}
     for key in keys:
         values = [m[key] for m in metrics_list if key in m and not np.isnan(m[key])]
@@ -338,8 +374,12 @@ def aggregate(metrics_list):
     return out
 
 
-def leave_one_run_out(runs, kind, loudness_reference=None, fpt_gate=False):
-    """Cross validation by complete run. Returns per run metrics."""
+def leave_one_run_out(runs, kind, loudness_reference=None, fpt_gate=False, collect=None):
+    """
+    Cross validation by complete run. Returns per run metrics. If collect is a
+    list, (prediction, truth) of every held out run is appended to it; these
+    honest errors are what the uncertainty range is built from.
+    """
     results = []
     for held_out in runs:
         train = [r for r in runs if r["run_id"] != held_out["run_id"]]
@@ -347,4 +387,6 @@ def leave_one_run_out(runs, kind, loudness_reference=None, fpt_gate=False):
         model = RULModel(kind).fit(train, loudness_reference, fpt_gate)
         prediction, _ = model.predict_run(held_out)
         results.append(run_metrics(held_out, prediction))
+        if collect is not None:
+            collect.append((prediction, held_out["rul_fraction"]))
     return results

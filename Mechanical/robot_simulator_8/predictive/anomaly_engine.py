@@ -60,6 +60,7 @@ class AnomalyModel(object):
         self.thermal_columns = [i for i, name in enumerate(self.feature_names)
                                 if any(name.endswith(m) for m in self.THERMAL_MARKERS)]
         self.thermal_reference = None
+        self.feature_threshold = None     # None = single feature check off
         self.training = {}
 
     # -- training -----------------------------------------------------------
@@ -103,6 +104,11 @@ class AnomalyModel(object):
         floor = np.maximum(0.5 * std, 0.05 * np.abs(self.median)) + 1e-9
         self.mad = np.maximum(mad, floor)
         self.threshold = float(np.percentile(self.raw_scores(calibration), self.threshold_percentile))
+        self.feature_threshold = None
+        if config.ANOMALY_FEATURE_CHECK:
+            largest = np.max(np.abs((calibration - self.median) / self.mad), axis=1)
+            self.feature_threshold = max(float(np.percentile(largest, config.ANOMALY_FEATURE_Z_PERCENTILE)),
+                                         config.ANOMALY_FEATURE_Z_MIN)
         if self.thermal_columns:
             reference = np.median(np.vstack([fit_part, calibration])[:, self.thermal_columns], axis=0)
             # Only usable where the healthy level is clearly positive (a warm
@@ -133,14 +139,17 @@ class AnomalyModel(object):
         scores = self.raw_scores(x)
         z = (x - self.median) / self.mad
         thermal = self.thermal_ratios(x)
+        feature_threshold = getattr(self, "feature_threshold", None)   # absent in older model files
         results = []
         for i in range(x.shape[0]):
             order = np.argsort(-np.abs(z[i]))[:top]
             hot = bool(np.isfinite(thermal[i]) and thermal[i] >= config.THERMAL_RATIO_WARN)
+            far = bool(feature_threshold is not None and abs(z[i, order[0]]) > feature_threshold)
             results.append({
                 "score": float(scores[i]),
                 "ratio": float(scores[i] / self.threshold) if self.threshold > 0 else 0.0,
-                "anomalous": bool(scores[i] > self.threshold) or hot,
+                "anomalous": bool(scores[i] > self.threshold) or hot or far,
+                "feature_alarm": far,
                 "thermal_ratio": float(thermal[i]) if np.isfinite(thermal[i]) else None,
                 "thermal_alarm": hot,
                 "top_features": [(self.feature_names[k], float(z[i, k])) for k in order],

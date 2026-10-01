@@ -138,6 +138,9 @@ def command_train(args):
     if result["cv"]:
         _print_metrics(result["cv"], "Leave one bearing out cross validation (training set)")
         _print_summary(result["cv_summary"], "cross validation")
+    if result.get("interval"):
+        print("  %.0f%% range: prediction +/- %.2f (from the errors on %d held out bearings)" % (
+            100 * result["interval"]["level"], result["interval"]["half_width"], result["interval"]["bearings"]))
     print("\nSaved %s" % result["model_path"])
     print("Next: python -m tools.rul evaluate --model-file %s --protocol %s" % (result["model_path"], args.protocol))
     return result
@@ -149,6 +152,13 @@ def command_evaluate(args):
     print("Model %s trained on %s (%s)" % (result["kind"], result["training_dataset"], result["protocol"]))
     _print_metrics(result["metrics"], "Validation on unseen bearings")
     _print_summary(result["summary"], "validation")
+    if result.get("interval") and "coverage" in result["summary"]:
+        worst = min(result["metrics"], key=lambda m: m.get("coverage", 1.0))
+        print("  %.0f%% range (prediction +/- %.2f): true RUL inside on %.0f%% of snapshots "
+              "(worst bearing %s: %.0f%%), average width %.2f" % (
+                  100 * result["interval"]["level"], result["interval"]["half_width"],
+                  100 * result["summary"]["coverage"], worst["run_id"], 100 * worst["coverage"],
+                  result["summary"]["interval_width"]))
     print("\n  rank = Spearman correlation between true and predicted RUL: is the order right?")
     print("  late err % = error of the predicted remaining TIME, from 50% of life onwards,")
     print("  as a percent of total life (early in life the time estimate is unstable).")
@@ -156,13 +166,14 @@ def command_evaluate(args):
         with open(args.curves, "w", newline="") as handle:
             writer = csv.writer(handle)
             writer.writerow(["bearing", "time_s", "life_fraction", "true_rul", "predicted_rul",
-                             "health_indicator"])
+                             "health_indicator", "rul_low", "rul_high"])
             for curve in result["curves"]:
                 for i in range(len(curve["times"])):
                     writer.writerow([curve["run_id"], "%.0f" % curve["times"][i],
                                      "%.4f" % curve["life_fraction"][i], "%.4f" % curve["true_rul"][i],
                                      "%.4f" % curve["predicted_rul"][i],
-                                     "%.4f" % curve["health_indicator"][i]])
+                                     "%.4f" % curve["health_indicator"][i],
+                                     "%.4f" % curve["rul_low"][i], "%.4f" % curve["rul_high"][i]])
         print("Curves written to %s" % args.curves)
     return result
 
@@ -218,14 +229,24 @@ def command_predict(args):
         print("NOTE: %s was used to train this model, so this is not a fair test." % recording.run_id)
     print("%s: %d snapshots, %.2f h recorded, model %s" % (
         recording.run_id, len(recording.files), run["total_life_s"] / 3600.0, model.kind))
-    print("\n  %8s %8s %13s %12s %9s" % ("time h", "% life", "predicted RUL", "remaining h", "health"))
+    bounds = model.predict_interval(prediction)
+    print("\n  %8s %8s %13s %15s %12s %9s" % ("time h", "% life", "predicted RUL",
+                                              "%.0f%% range" % (100 * model.interval["level"]) if bounds else "range",
+                                              "remaining h", "health"))
     for fraction in (0.1, 0.25, 0.5, 0.75, 0.9, 1.0):
         i = min(len(prediction) - 1, int(round(fraction * (len(prediction) - 1))))
         t = run["times"][i]
         f = float(prediction[i])
         remaining = t * f / (1.0 - f) / 3600.0 if 0.0 < f < 0.99 and t > 0 else None
-        print("  %8.2f %7.0f%% %13.2f %12s %9.2f" % (t / 3600.0, 100 * run["life_fraction"][i], f,
-                                                   _fmt(remaining, "%.2f"), health[i]))
+        spread = "%.2f - %.2f" % (bounds[0][i], bounds[1][i]) if bounds else "n/a"
+        print("  %8.2f %7.0f%% %13.2f %15s %12s %9.2f" % (t / 3600.0, 100 * run["life_fraction"][i], f, spread,
+                                                         _fmt(remaining, "%.2f"), health[i]))
+    if bounds:
+        print("\n  Range: the true RUL was inside it for %.0f%% of snapshots on bearings the model did not"
+              % (100 * model.interval["level"]))
+        print("  train on. A wide range means the model cannot tell more precisely; trust the range.")
+    else:
+        print("\n  This model file has no uncertainty range (trained before ranges existed, or on fewer than 3 bearings).")
     print("\n  '% life' assumes the folder ends at failure (true for PHM 2012 and XJTU-SY).")
     print("  For a machine still running, read the last row: predicted RUL is the share of life left.")
 

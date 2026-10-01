@@ -1,0 +1,34 @@
+  cross validation: MAE 0.202  RMSE 0.243  R2 0.23  rank 0.81  (MAE = 20.2% of life, 15 bearings)
+  90% range: prediction +/- 0.42 (from the errors on 15 held out bearings)
+Model RANDOM_FOREST trained on XJTU_SY (XJTU_TO_PHM)
+  validation: MAE 0.175  RMSE 0.205  R2 0.43  rank 0.84  (MAE = 17.5% of life, 17 bearings)
+  90% range (prediction +/- 0.42): true RUL inside on 94% of snapshots (worst bearing PHM_Bearing1_1: 73%), average width 0.70
+  cross validation: MAE 0.200  RMSE 0.251  R2 0.17  rank 0.80  (MAE = 20.0% of life, 6 bearings)
+  90% range: prediction +/- 0.46 (from the errors on 6 held out bearings)
+Model RANDOM_FOREST trained on PHM2012 (PHM_LEARNING_TO_FULL_TEST)
+  validation: MAE 0.198  RMSE 0.243  R2 0.22  rank 0.83  (MAE = 19.8% of life, 11 bearings)
+  90% range (prediction +/- 0.46): true RUL inside on 91% of snapshots (worst bearing PHM_Bearing2_7: 69%), average width 0.72
+PHM_Bearing1_3: 2375 snapshots, 6.59 h recorded, model RANDOM_FOREST
+
+    time h   % life predicted RUL       90% range  remaining h    health
+      0.66      10%          0.69     0.28 - 1.00         1.49      0.90
+      1.65      25%          0.64     0.22 - 1.00         2.87      0.88
+      3.30      50%          0.37     0.00 - 0.78         1.90      0.86
+      4.94      75%          0.17     0.00 - 0.58         0.98      0.46
+      5.94      90%          0.19     0.00 - 0.61         1.40      0.23
+      6.59     100%          0.19     0.00 - 0.61         1.54      0.13
+
+  Range: the true RUL was inside it for 90% of snapshots on bearings the model did not
+  train on. A wide range means the model cannot tell more precisely; trust the range.
+
+  '% life' assumes the folder ends at failure (true for PHM 2012 and XJTU-SY).
+  For a machine still running, read the last row: predicted RUL is the share of life left.
+PHM_Bearing2_3: 1955 snapshots, 5.43 h recorded, model RANDOM_FOREST
+
+    time h   % life predicted RUL       90% range  remaining h    health
+      0.54      10%          0.70     0.29 - 1.00         1.29      0.84
+      1.36      25%          0.23     0.00 - 0.64         0.40      0.60
+      2.71      50%          0.22     0.00 - 0.63         0.76      0.60
+      4.07      75%          0.24     0.00 - 0.66         1.31      0.60
+      4.89      90%          0.27     0.00 - 0.69         1.82      0.60
+      5.43     100%          0.31     0.00 - 0.73         2.44      0.59

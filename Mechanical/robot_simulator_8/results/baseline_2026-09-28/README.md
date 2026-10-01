@@ -131,3 +131,10 @@ Full explanation of every row: `CODE_GUIDE_MECHANICAL.md`, section 9.
 | 2026-10-01 | A1/A2: less smoothing after degradation is detected, or proportional to time lived (4 variants) | XJTU → PHM | 0.191–0.195 | 0.24–0.32 | 0.68–0.77 | fixes Bearing2_7 (MAE 0.285 → 0.153–0.217) | No | noise returns for the other bearings; worse on dev and test |
 | 2026-10-01 | B1/B2: stricter degradation detector (RMS only, or RMS and kurtosis) | XJTU → PHM | 0.188–0.198 | 0.22–0.38 | 0.87–0.88 | Bearing2_3 unchanged | No | better on dev, worse on test (gate stays closed too long) |
 | 2026-10-01 | B3: kurtosis only counts once RMS has grown 0.2 | XJTU → PHM | 0.178 | 0.40 | 0.86 | fixes Bearing1_1 (rank 0.19 → 0.90); Bearing2_3 unchanged | No (option kept, off) | dev gain comes from one dev bearing; test slightly worse (0.172 → 0.179) |
+| 2026-10-01 | **Sturdier degradation detector: minimum spread 5%** (`RUL_FPT_STD_FLOOR`) | XJTU → PHM | **0.175** | **0.43** | **0.84** | Bearing2_7 (R² -0.23) | **Yes** | old detector fired on a bearing that never wears (6 of 6); this one never does; best on dev among the variants that pass that check; test agrees (0.172 → 0.158) |
+| 2026-10-01 | Detector alternatives: 8 / 12 std, minimum spread 10%, 30 min normal window | XJTU → PHM | 0.170–0.197 | 0.28–0.45 | 0.83–0.86 | — | No | still fire on noise (8 std, 30 min) or clearly worse on dev (12 std, 10%) |
+| 2026-10-01 | **Uncertainty range: prediction ± 0.42** (90% quantile of cross validation errors) | XJTU → PHM | — | — | — | Bearing1_1 (73% coverage) | **Yes** | coverage 91% on dev, 95% on test, promise 90%; width by predicted value rejected (83% on dev) |
+| 2026-10-01 | **Anomaly engine: single feature check** (99th percentile, min 6 robust std; fixed in advance) | SEU + CWRU | — | — | — | CWRU load 3 false alarms still 22% | **Yes** | CWRU load 0 ball fault 64.8% → 96.3% detected; false alarms +1.4 points on three SEU setups |
+
+Sections 10 and 11 of `CODE_GUIDE_MECHANICAL.md` explain these four rows. Note: the
+frozen files in `raw/` are from 28 September, before these changes.

@@ -1,0 +1,26 @@
+Target: the true RUL inside the range 90% of the time.
+
+Errors from XJTU cross validation (model never saw PHM):
+  fixed width            on dev  ( 6 bearings): coverage 91% (worst bearing 73%), average width 0.68
+  fixed width            on test (11 bearings): coverage 95% (worst bearing 77%), average width 0.71
+  fixed width            on all  (17 bearings): coverage 94% (worst bearing 73%), average width 0.70
+  binned by prediction   on dev  ( 6 bearings): coverage 83% (worst bearing 62%), average width 0.66
+  binned by prediction   on test (11 bearings): coverage 91% (worst bearing 77%), average width 0.71
+  binned by prediction   on all  (17 bearings): coverage 88% (worst bearing 62%), average width 0.69
+
+Errors from the 6 PHM dev bearings (calibrated on the target machine):
+  fixed width            on test (11 bearings): coverage 95% (worst bearing 75%), average width 0.69
+  binned by prediction   on test (11 bearings): coverage 86% (worst bearing 37%), average width 0.61
+     predicted RUL band -> range added to the prediction
+       0.0 - 0.2:  -0.15 to +0.56
+       0.2 - 0.4:  -0.22 to +0.44
+       0.4 - 0.6:  -0.28 to +0.41
+       0.6 - 0.8:  -0.30 to +0.24
+       0.8 - 1.0:  -0.24 to +0.44
+
+XJTU-CV binned table:
+       0.0 - 0.2:  -0.09 to +0.37
+       0.2 - 0.4:  -0.29 to +0.41
+       0.4 - 0.6:  -0.50 to +0.39
+       0.6 - 0.8:  -0.48 to +0.23
+       0.8 - 1.0:  -0.59 to +0.08

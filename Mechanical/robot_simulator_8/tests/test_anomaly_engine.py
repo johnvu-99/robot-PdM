@@ -37,13 +37,25 @@ def test_evaluation_report_has_false_alarms_and_detection_per_fault(model):
     assert report["labels"]["DAMAGED"]["roc_auc"] > 0.95
 
 
-@pytest.mark.xfail(strict=False, reason=(
-    "Known weakness: a fault that moves ONE feature, even by 15 standard deviations, is only "
-    "caught about 70% of the time. An Isolation Forest dilutes a single unusual feature among "
-    "the normal ones. The thermal ratio check exists for this reason; other features have none."))
 def test_a_fault_in_a_single_feature_is_detected(model):
+    """One feature 15 std out. The forest alone caught ~70%; the single feature check closes it."""
     faulty = healthy(100, 2) + [0.0, 3.0, 0.0]
-    assert np.mean([r["anomalous"] for r in model.score(faulty)]) > 0.9
+    results = model.score(faulty)
+    assert np.mean([r["anomalous"] for r in results]) > 0.9
+    assert np.mean([r["feature_alarm"] for r in results]) > 0.9
+
+
+def test_single_feature_check_can_be_switched_off(monkeypatch):
+    import config
+    monkeypatch.setattr(config, "ANOMALY_FEATURE_CHECK", False)
+    forest_only = AnomalyModel("rig A", NAMES, n_estimators=50).fit(healthy(300, 0))
+    assert forest_only.feature_threshold is None
+    assert not any(r["feature_alarm"] for r in forest_only.score(healthy(100, 2) + [0.0, 3.0, 0.0]))
+
+
+def test_single_feature_threshold_is_never_below_the_minimum(model):
+    import config
+    assert model.feature_threshold >= config.ANOMALY_FEATURE_Z_MIN
 
 
 def test_too_little_healthy_data_is_a_clear_error():

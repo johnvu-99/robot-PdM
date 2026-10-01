@@ -70,6 +70,9 @@ def test_train_then_evaluate_runs_end_to_end(roots, tmp_path):
     evaluated = run_job("evaluate_rul", {"protocol": "XJTU_TO_PHM", "model_path": path, "roots": roots})
     assert len(evaluated["metrics"]) == 5
     assert 0.0 <= evaluated["summary"]["mae"] <= 1.0
+    assert trained["interval"]["bearings"] == 3 and trained["interval"]["half_width"] > 0.0
+    assert 0.0 <= evaluated["summary"]["coverage"] <= 1.0
+    assert set(evaluated["curves"][0]) >= {"rul_low", "rul_high", "predicted_rul"}
 
 
 def test_evaluating_a_model_on_a_bearing_it_trained_on_is_refused(roots, tmp_path):

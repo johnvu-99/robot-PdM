@@ -519,6 +519,11 @@ RUL_FPT_GATE_BY_PROTOCOL = {
     "XJTU_PLUS_PHM_TO_FULL_TEST": False,
 }
 RUL_FPT_K = 5.0
+# "Normal" is never taken to vary by less than this (log growth for RMS, ratio
+# for kurtosis; 0.05 = 5%). Without it the detector fired on pure noise: the
+# first 10 minutes can look calmer than the bearing really is. Chosen as the
+# best on dev among the variants that never fire on a bearing that does not wear.
+RUL_FPT_STD_FLOOR = 0.05
 RUL_FPT_SUSTAIN_S = 120.0
 RUL_FPT_HEALTHY_S = 600.0
 # Health indicator: HI = exp(-k * degradation), degradation = running max of
@@ -537,6 +542,14 @@ RUL_CROSS_DATASET_SMOOTHING_TAU_S = 900.0
 # rank metric almost automatic (0.94 - 1.00 for every model) without improving
 # MAE or R2, and locks in early false drops.
 RUL_MONOTONE_PREDICTION = False
+# Uncertainty range around every prediction: prediction +/- a fixed half width,
+# the RUL_INTERVAL_LEVEL quantile of the model's absolute errors in leave one
+# bearing out cross validation (every bearing counted equally). Stored in the
+# model file. Measured: a "90%" range from XJTU-SY covered the true RUL on 94%
+# of PHM snapshots. A width that depends on the predicted value was tested and
+# rejected: it covered only 83% on the dev bearings.
+RUL_INTERVAL_LEVEL = 0.90
+RUL_INTERVAL_POINTS_PER_RUN = 200
 
 RUL_MODELS = ("LINEAR_REGRESSION", "RANDOM_FOREST", "GRADIENT_BOOSTING")
 RUL_DEFAULT_MODEL = "RANDOM_FOREST"
@@ -656,6 +669,15 @@ PARTNER_SPLIT_SEED = 17
 PARTNER_RUL_BASELINE_WINDOWS = 10
 PARTNER_ANOMALY_CALIBRATION_FRACTION = 0.3
 PARTNER_ANOMALY_THRESHOLD_PERCENTILE = 95.0
+# Single feature check, next to the Isolation Forest. The forest judges the
+# overall pattern and dilutes ONE feature that is far out (a fault moving one
+# feature by 15 std was caught only ~70% of the time). With the check on, a
+# window is also anomalous when any feature's robust z exceeds a threshold: the
+# given percentile of the largest |z| on held-out healthy data, never below
+# ANOMALY_FEATURE_Z_MIN. Both values were fixed before looking at results.
+ANOMALY_FEATURE_CHECK = True
+ANOMALY_FEATURE_Z_PERCENTILE = 99.0
+ANOMALY_FEATURE_Z_MIN = 6.0
 
 # Validation warnings.
 PARTNER_MAX_NAN_FRACTION = 0.05

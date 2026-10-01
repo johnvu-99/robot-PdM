@@ -119,6 +119,7 @@ def test_model_files_from_before_the_new_settings_still_load(tmp_path):
                  "target": "RUL_fraction"}, path)
     loaded = RULModel.load(path)
     assert loaded.loudness_reference == "START" and loaded.fpt_floor is None
+    assert loaded.interval is None and loaded.predict_interval(np.zeros(3)) is None
 
 
 def test_a_file_that_is_not_an_rul_model_is_refused(tmp_path):
@@ -147,15 +148,20 @@ def test_degradation_start_is_reported_by_the_time_wear_is_clear():
     assert healthy_window < fpt < 140
 
 
-@pytest.mark.xfail(strict=False, reason=(
-    "Known weakness: the first 10 minutes (11 snapshots at one per minute) are too few to "
-    "measure the normal spread, so 5 standard deviations is exceeded by noise alone. The gate "
-    "therefore opens early; it works as 'no low prediction early in life', not as a true "
-    "degradation detector. See CODE_GUIDE_MECHANICAL.md section 9."))
-def test_a_bearing_that_never_wears_is_never_flagged():
-    run = make_run("A", wear_from=2.0)
+@pytest.mark.parametrize("seed", range(6))
+def test_a_bearing_that_never_wears_is_never_flagged(seed):
+    """Noise alone must not count as degradation (it did before RUL_FPT_STD_FLOOR)."""
+    run = make_run("A", wear_from=2.0, seed=seed)
     matrix, names, _ = rul_features(run, "QUIETEST")
     assert detect_fpt(run, matrix, names) == 200
+
+
+def test_without_the_minimum_spread_the_detector_fires_on_noise(monkeypatch):
+    """Documents why the floor exists: switch it off and the old weakness is back."""
+    monkeypatch.setattr(config, "RUL_FPT_STD_FLOOR", 0.0)
+    run = make_run("A", wear_from=2.0)
+    matrix, names, _ = rul_features(run, "QUIETEST")
+    assert detect_fpt(run, matrix, names) < 200
 
 
 def test_degradation_start_does_not_move_when_more_is_recorded():
@@ -210,3 +216,47 @@ def test_monotone_option_is_off_by_default_and_works_when_on(monkeypatch):
     assert np.any(np.diff(postprocess_prediction(raw.copy(), run, "PHM2012")) > 0)
     monkeypatch.setattr(config, "RUL_MONOTONE_PREDICTION", True)
     assert np.all(np.diff(postprocess_prediction(raw.copy(), run, "PHM2012")) <= 0)
+
+
+# -- uncertainty range ------------------------------------------------------
+
+def held_out_pairs():
+    pairs = []
+    leave_one_run_out(training_runs(), "LINEAR_REGRESSION", collect=pairs)
+    return pairs
+
+
+def test_cross_validation_hands_back_one_honest_prediction_per_bearing():
+    pairs = held_out_pairs()
+    assert len(pairs) == 4 and all(len(p) == len(t) == 200 for p, t in pairs)
+
+
+def test_range_covers_about_the_promised_share_of_the_errors_it_was_built_from():
+    pairs = held_out_pairs()
+    model = RULModel("LINEAR_REGRESSION").fit(training_runs()).set_interval(pairs, level=0.90)
+    inside = []
+    for prediction, truth in pairs:
+        low, high = prediction - model.interval["half_width"], prediction + model.interval["half_width"]
+        inside.append(np.mean((truth >= low) & (truth <= high)))
+    assert np.mean(inside) == pytest.approx(0.90, abs=0.02)
+
+
+def test_range_stays_between_zero_and_one_and_contains_the_prediction():
+    model = RULModel("LINEAR_REGRESSION").fit(training_runs()).set_interval(held_out_pairs())
+    prediction, _ = model.predict_run(make_run("XJTU_new", seed=9))
+    low, high = model.predict_interval(prediction)
+    assert np.all((low >= 0.0) & (high <= 1.0) & (low <= prediction) & (prediction <= high))
+
+
+def test_a_stricter_level_gives_a_wider_range():
+    pairs = held_out_pairs()
+    narrow = RULModel("LINEAR_REGRESSION").set_interval(pairs, level=0.5).interval["half_width"]
+    wide = RULModel("LINEAR_REGRESSION").set_interval(pairs, level=0.95).interval["half_width"]
+    assert wide > narrow > 0.0
+
+
+def test_range_survives_save_and_load_and_is_absent_without_cross_validation(tmp_path):
+    assert RULModel("LINEAR_REGRESSION").fit(training_runs()).predict_interval(np.zeros(3)) is None
+    model = RULModel("LINEAR_REGRESSION").fit(training_runs()).set_interval(held_out_pairs())
+    loaded = RULModel.load(model.save(str(tmp_path / "m.joblib")))
+    assert loaded.interval == model.interval

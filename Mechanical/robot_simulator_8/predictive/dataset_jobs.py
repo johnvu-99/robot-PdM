@@ -22,7 +22,7 @@ from datasets.phm2012 import PHM2012DatasetAdapter
 from datasets.xjtu_sy import XJTUSYDatasetAdapter
 from predictive import fault_validation
 from predictive.rul_model import (
-    RULModel, aggregate, assert_disjoint, leave_one_run_out, run_metrics,
+    RULModel, aggregate, assert_disjoint, interval_metrics, leave_one_run_out, run_metrics,
 )
 
 
@@ -175,20 +175,23 @@ def job_train_rul(ctx, params):
     reference = config.RUL_LOUDNESS_REFERENCE_BY_PROTOCOL.get(protocol, config.RUL_LOUDNESS_REFERENCE)
     fpt_gate = config.RUL_FPT_GATE_BY_PROTOCOL.get(protocol, False)
     cv = []
+    held_out_predictions = []
     if len(train) >= 3:
         ctx.progress("Leave one run out cross validation (%d folds)" % len(train))
-        cv = leave_one_run_out(train, kind, reference, fpt_gate)
+        cv = leave_one_run_out(train, kind, reference, fpt_gate, collect=held_out_predictions)
     ctx.check()
     ctx.progress("Fitting %s on %d training runs" % (kind, len(train)))
     started = time.perf_counter()
     model = RULModel(kind).fit(train, reference, fpt_gate)
+    model.set_interval(held_out_predictions)
     stamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     path = params.get("path") or os.path.join(config.MODEL_DIR, "rul_%s_%s_%s.joblib"
                                               % (kind.lower(), protocol.lower(), stamp))
     model.save(path)
     return {"model_path": path, "kind": kind, "protocol": protocol,
             "training_runs": model.training_runs, "validation_runs": [r["run_id"] for r in test],
-            "cv": cv, "cv_summary": aggregate(cv), "fit_seconds": time.perf_counter() - started}
+            "cv": cv, "cv_summary": aggregate(cv), "interval": model.interval,
+            "fit_seconds": time.perf_counter() - started}
 
 
 def job_evaluate_rul(ctx, params):
@@ -202,9 +205,15 @@ def job_evaluate_rul(ctx, params):
     for run in test:
         ctx.check()
         prediction, health = model.predict_run(run)
-        metrics.append(run_metrics(run, prediction))
+        row = run_metrics(run, prediction)
+        bounds = model.predict_interval(prediction)
+        if bounds is not None:
+            row.update(interval_metrics(run, bounds[0], bounds[1]))
+        metrics.append(row)
         step = max(1, run["times"].shape[0] // 600)
+        low, high = bounds if bounds is not None else (prediction, prediction)
         curves.append({"run_id": run["run_id"], "times": run["times"][::step].tolist(),
+                       "rul_low": low[::step].tolist(), "rul_high": high[::step].tolist(),
                        "life_fraction": run["life_fraction"][::step].tolist(),
                        "true_rul": run["rul_fraction"][::step].tolist(),
                        "predicted_rul": prediction[::step].tolist(),
@@ -212,7 +221,8 @@ def job_evaluate_rul(ctx, params):
                        "total_life_s": run["total_life_s"]})
     return {"model_path": params["model_path"], "kind": model.kind, "protocol": protocol,
             "training_dataset": model.training_dataset, "training_runs": model.training_runs,
-            "metrics": metrics, "summary": aggregate(metrics), "curves": curves}
+            "metrics": metrics, "summary": aggregate(metrics), "curves": curves,
+            "interval": model.interval}
 
 
 def job_mechanical(ctx, params):
