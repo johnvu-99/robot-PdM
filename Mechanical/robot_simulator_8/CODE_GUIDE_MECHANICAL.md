@@ -1036,6 +1036,13 @@ when it runs on Mechanical-datasets.
   training bearings, and with the 15 XJTU-SY bearings, the random forest has
   the lowest validation error (see the tables in README.md). Do not carry a
   model choice over from a smaller experiment.
+- **A fault that changes only one feature is often missed.** In the tests, one
+  feature moved by 10–15 standard deviations was flagged in only about 70% of
+  windows; two features together, 100%. An Isolation Forest dilutes a single
+  unusual feature among the normal ones. The thermal ratio check was added for
+  exactly this reason; the other features have no such check yet.
+- **The degradation detector (FPT) fires on noise**, see the correction under
+  Fix 4 in section 9.
 - **Partner results so far come from synthetic data** and say nothing about real
   performance.
 
@@ -1055,6 +1062,7 @@ when it runs on Mechanical-datasets.
 | force features to be recomputed | delete `data/processed/` |
 | change how RUL features are referenced, gated or smoothed | the `RUL_LOUDNESS_*`, `RUL_FPT_*` and `RUL_*SMOOTHING*` settings in `config.py` (section 9) |
 | try a new RUL idea without touching the main code | add a variant to `results/experiments/xjtu_to_phm_rank.py` |
+| check nothing broke after a change | `python -m pytest tests -q` (a few seconds, no datasets needed) |
 
 ---
 
@@ -1285,6 +1293,18 @@ Two surprises:
 degradation is detected, the model is not allowed to say "70% of life is gone"
 — which is exactly the Bearing1_5 mistake from Step 1. It improved all three
 dev metrics clearly, and the test bearings agree.
+
+**Correction (1 Oct, found by the tests).** The detector is weaker than its
+name suggests. On a synthetic bearing that NEVER wears, it still fired in every
+trial (at snapshot 21–85 of 200): "normal" is measured from only the first 10
+minutes (11 snapshots at one per minute), too few to know the real spread, so
+noise alone exceeds 5 standard deviations. That is also why it fires at 10–20%
+of life on PHM. So the gate works mostly as **"do not predict a low RUL early
+in life"**, not as a true degradation detector. The improvement is still real —
+it was chosen on dev and confirmed on test — but the honest description is the
+weaker one. A sturdier detector (a longer normal window, or a minimum spread)
+is future work and must go through the same dev/test check. The weakness is
+recorded as an expected failure in `tests/test_rul_model.py`.
 
 **Side effect check.** Gate forced on for PHM → PHM: validation MAE 0.199 vs
 0.198 and a dev gain too small to count (the same rule that rejected the trend

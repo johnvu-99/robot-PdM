@@ -19,14 +19,17 @@ venv/
 
 # Runtime output
 **/data/logs/
+.pytest_cache/
 
-# Earlier phases (1-6) are kept locally only, not published
+# Earlier phases are kept locally only. Phase 7 is published as the git tag
+# "phase-7"; the current project is Mechanical/robot_simulator_8.
 /RS1/
 /RS2/
 /RS3/
 /RS4/
 /RS5/
 /RS6/
+/RS7/
 
 # Experiment data cache (rebuilt automatically)
 **/results/experiments/.runs_*.pkl

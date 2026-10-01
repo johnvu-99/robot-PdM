@@ -1,0 +1,11 @@
+# Python 3.10 (macOS / Linux). The versions the project is developed and tested
+# with. requirements.txt stays pinned for Python 3.7 on Windows.
+# numpy first on purpose: see "Install" in README.md.
+numpy==1.23.5
+pybullet==3.2.5
+PyQt5==5.15.11
+pyqtgraph==0.13.7
+scipy==1.9.3
+scikit-learn==1.0.2
+joblib==1.6.0
+openpyxl==3.1.5

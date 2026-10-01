@@ -1,0 +1,7 @@
+# What the tests need: the dataset and machine learning side only.
+# No PyQt5, no pybullet and no downloaded datasets (tests build small synthetic ones).
+numpy==1.23.5
+scipy==1.9.3
+scikit-learn==1.0.2
+joblib==1.6.0
+pytest>=8

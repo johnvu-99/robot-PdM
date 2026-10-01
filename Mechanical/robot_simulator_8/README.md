@@ -103,10 +103,55 @@ Verify the install:
 python -c "import pybullet, PyQt5, numpy; print(pybullet.getAPIVersion())"
 ```
 
+## Install (macOS or Linux, Python 3.10)
+
+The project is developed on macOS with Python 3.10 in a conda environment:
+
+```
+conda create -n mechanical python=3.10
+conda activate mechanical
+conda install -c conda-forge pybullet=3.2.5
+pip install -r requirements-py310.txt
+```
+
+pybullet comes from conda-forge because pip may try to build it from source,
+which needs a C++ compiler (on macOS: `xcode-select --install`). The versions in
+`requirements-py310.txt` are the ones in the development environment; they have
+not been re-checked on a clean machine.
+
+To work only on the dataset and machine learning side (`datasets/`,
+`predictive/`, `tools/`), the simulator packages are not needed:
+
+```
+pip install -r requirements-test.txt
+```
+
+## Tests
+
+```
+python -m pytest tests -q
+```
+
+About 50 tests, a few seconds, no downloaded datasets needed: they build small
+synthetic bearings and dataset folders, and write only to a temporary folder.
+They run automatically on every push (GitHub Actions, `.github/workflows/tests.yml`).
+
+| File | What it protects |
+| --- | --- |
+| `tests/test_signal_features.py` | features give textbook values on known signals (a sine has RMS = A/√2, kurtosis 1.5) |
+| `tests/test_adapters.py` | the right files are found, in the right order, with labels from 1 (new) to 0 (failed); PHM `Test_set` is never used |
+| `tests/test_rul_model.py` | no feature or smoothing uses the future; a bearing can never be in train and test; old model files still load |
+| `tests/test_protocols.py` | each protocol trains and tests on the bearings it claims; train then evaluate runs end to end |
+| `tests/test_anomaly_engine.py` | healthy data gives few false alarms; a fault is detected and the changed feature is named |
+
+Two tests are marked as expected failures. They record known weaknesses, so they
+stay visible: a fault that changes a single feature is only caught about 70% of
+the time, and the degradation detector can fire on noise (CODE_GUIDE section 9).
+
 ## Run
 
 ```
-.venv\Scripts\activate
+.venv\Scripts\activate          (Windows)   or   conda activate mechanical   (macOS / Linux)
 python main.py
 ```
 

@@ -7,21 +7,36 @@ second: fixed 240 Hz physics on a dedicated thread, offscreen PyBullet
 rendering, PyQt5 front end — grown phase by phase into a condition-monitoring
 and remaining-useful-life (RUL) research platform.
 
-Each published phase is kept as its own self-contained snapshot. Phases 1 to 6
-(core simulator, fault injection, telemetry, baselines, anomaly detection, first
-dataset adapters) are included in both folders below and are not published
-separately.
+[![tests](https://github.com/johnvu-99/robot-PdM/actions/workflows/tests.yml/badge.svg)](https://github.com/johnvu-99/robot-PdM/actions/workflows/tests.yml)
+
+## What it does
+
+| Part | What it is | Result |
+| --- | --- | --- |
+| Simulator | KUKA iiwa with fault injection, a motor thermal model, live telemetry, per-joint health scores and maintenance advice | physics holds 240 Hz with all dashboards running |
+| Fault detection | anomaly detection trained on healthy data only, plus fault classification, on the SEU gearbox and CWRU bearing test rigs | 99.6% accuracy (9 classes, SEU), 98.0% (4 classes, CWRU) |
+| Remaining useful life (RUL) | predicts the share of life left from vibration, on 32 run-to-failure bearings from two labs (XJTU-SY, PHM 2012) | trained on one lab, tested on the other: error 18% of life (guessing: 25%), order of degradation right (rank 0.82) |
+
+These are test rig datasets, not robot telemetry. The limits are documented as
+carefully as the results: which bearings the model still gets wrong and why,
+which ideas were tried and rejected, and two known weaknesses kept visible as
+expected-failure tests.
 
 ## Repository layout
 
-| Folder | Phase | What it adds |
-| --- | --- | --- |
-| [`RS7/`](RS7/robot_simulator_7) | 1 - 7 | Full simulator through phase 7: RUL pipeline refinement, leakage controls, cross-dataset validation |
-| [`Mechanical/`](Mechanical/robot_simulator_8) | 7 + partner data | Current line of work: partner dataset ingestion, `tools/`, trained RUL models |
+The project is [`Mechanical/robot_simulator_8/`](Mechanical/robot_simulator_8).
+It was built phase by phase (core simulator → fault injection → telemetry →
+baselines → anomaly detection → real datasets and RUL → health and maintenance
+→ partner data); all phases are contained in it. The phase 7 snapshot is kept
+as the git tag [`phase-7`](https://github.com/johnvu-99/robot-PdM/tree/phase-7).
 
-Start with [`Mechanical/robot_simulator_8/README.md`](Mechanical/robot_simulator_8/README.md)
-— it is the most complete, and covers the full architecture, the fault
-injection model, the monitoring pipeline and the RUL results.
+| Where | What |
+| --- | --- |
+| [`README.md`](Mechanical/robot_simulator_8/README.md) | architecture, install, how to run, all results |
+| [`CODE_GUIDE_MECHANICAL.md`](Mechanical/robot_simulator_8/CODE_GUIDE_MECHANICAL.md) | code walkthrough; section 9 is the full story of the RUL experiments, including the ones that failed |
+| [`results/baseline_2026-09-28/`](Mechanical/robot_simulator_8/results/baseline_2026-09-28) | frozen baseline of every model and the experiment log |
+| [`tests/`](Mechanical/robot_simulator_8/tests) | about 50 tests, run on every push |
+| [`PARTNER_DATA_SPEC.md`](Mechanical/robot_simulator_8/PARTNER_DATA_SPEC.md) | how a partner should record and hand over robot data |
 
 ## Datasets
 
@@ -35,16 +50,10 @@ models in `models/`, and simulator-generated telemetry in `data/simulation/`.
 
 ## Running
 
-Each phase folder is independently runnable:
-
 ```
 cd Mechanical/robot_simulator_8
-pip install -r requirements.txt
-python main.py
+pip install -r requirements-py310.txt      # Python 3.10; see the README there for Windows / Python 3.7
+python main.py                              # the simulator and dashboards
+python -m tools.rul compare                 # train and compare the RUL models (needs the datasets)
+python -m pytest tests -q                   # the tests (no datasets needed)
 ```
-
-Key docs in the current phase:
-
-- [`README.md`](Mechanical/robot_simulator_8/README.md) — architecture and results
-- [`CODE_GUIDE_MECHANICAL.md`](Mechanical/robot_simulator_8/CODE_GUIDE_MECHANICAL.md) — code walkthrough
-- [`PARTNER_DATA_SPEC.md`](Mechanical/robot_simulator_8/PARTNER_DATA_SPEC.md) — data hand-over format
