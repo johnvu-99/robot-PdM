@@ -1,0 +1,2 @@
+XJTU_TO_PHM                  constant 0.5 on 17 validation bearings: MAE 0.250  RMSE 0.289  R2 0.00  rank n/a
+PHM_LEARNING_TO_FULL_TEST    constant 0.5 on 11 validation bearings: MAE 0.250  RMSE 0.289  R2 0.00  rank n/a

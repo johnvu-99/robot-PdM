@@ -67,8 +67,9 @@ def _baseline_count(run):
     return max(1, min(count, max(1, total // 4)))
 
 
-def rul_features(run):
+def rul_features(run, loudness_reference=None):
     """Returns (matrix (T, F), names, health_indicator (T,))."""
+    reference = loudness_reference or config.RUL_LOUDNESS_REFERENCE
     names_in = list(run["names"])
     features = run["features"]
     base_n = _baseline_count(run)
@@ -86,6 +87,20 @@ def rul_features(run):
                 value = x - base
             else:
                 value = x / base if abs(base) > 1e-12 else x
+            if quantity in LOG_RATIO and reference in ("QUIETEST", "BOTH"):
+                quietest = np.minimum.accumulate(
+                    _ema_time(np.maximum(x, 1e-12), times, config.RUL_QUIETEST_TAU_S))
+                above_quietest = np.log(np.maximum(x, 1e-12) / quietest)
+                if reference == "QUIETEST":
+                    value = above_quietest
+                else:
+                    columns.append(above_quietest)
+                    names.append("%s_%s_above_quietest" % (channel, quantity))
+            if quantity == "rms":
+                rms_growth = _ema_time(value, times, config.RUL_EMA_FAST_TAU_S)
+            if quantity == "kurtosis" and config.RUL_KURTOSIS_NEEDS_GROWTH > 0:
+                confirmed = np.clip(rms_growth / config.RUL_KURTOSIS_NEEDS_GROWTH, 0.0, 1.0)
+                value = 1.0 + (value - 1.0) * confirmed
             columns.append(value)
             names.append("%s_%s_rel" % (channel, quantity))
             if quantity in SMOOTHED:
@@ -99,12 +114,70 @@ def rul_features(run):
                 names.extend(["%s_%s_ema_fast" % (channel, quantity),
                               "%s_%s_ema_slow" % (channel, quantity),
                               "%s_%s_runmax" % (channel, quantity)])
+                if config.RUL_TREND_FEATURES:
+                    columns.append(fast - slow)
+                    names.append("%s_%s_trend" % (channel, quantity))
                 if quantity == "rms":
                     degradation.append(np.maximum.accumulate(slow))
+    if config.RUL_DROP_LOUDNESS_FEATURES:
+        keep = [i for i, name in enumerate(names)
+                if not any("_%s_" % q in name for q in LOG_RATIO)]
+        columns = [columns[i] for i in keep]
+        names = [names[i] for i in keep]
     matrix = np.column_stack(columns)
     level = np.maximum(0.0, np.mean(degradation, axis=0))
     health = np.exp(-config.HEALTH_INDICATOR_SENSITIVITY * level)
     return matrix, names, health
+
+
+FPT_SIGNALS = ("rms_ema_fast", "kurtosis_ema_fast")
+
+
+def detect_fpt(run, matrix, names):
+    """
+    First predicting time: index of the first snapshot where degradation has
+    started, using only past snapshots. Normal range = this run's first
+    RUL_FPT_HEALTHY_S seconds; degradation = any FPT signal above
+    mean + RUL_FPT_K * std for RUL_FPT_SUSTAIN_S seconds. len(run) if never.
+    """
+    times = np.asarray(run["times"], dtype=np.float64) - float(run["times"][0])
+    healthy = times <= config.RUL_FPT_HEALTHY_S
+    above = np.zeros(len(times), dtype=bool)
+    for channel in ("horizontal", "vertical"):
+        for signal in FPT_SIGNALS:
+            name = "%s_%s" % (channel, signal)
+            if name not in names:
+                continue
+            x = matrix[:, names.index(name)]
+            mean, std = np.mean(x[healthy]), max(np.std(x[healthy]), 1e-6)
+            above |= x > mean + config.RUL_FPT_K * std
+    start = None
+    for i in range(len(times)):
+        if not above[i]:
+            start = None
+            continue
+        if start is None:
+            start = i
+        if times[i] - times[start] >= config.RUL_FPT_SUSTAIN_S and times[start] > config.RUL_FPT_HEALTHY_S:
+            return start
+    return len(times)
+
+
+def postprocess_prediction(prediction, run, training_dataset=""):
+    """
+    Causal clean-up of a predicted RUL curve. On a dataset the model was not
+    trained on, per snapshot predictions are noisy, so they are smoothed with a
+    time based EMA. Optionally a running minimum: a real bearing's remaining
+    life only goes down.
+    """
+    trained_on = set(training_dataset.split(",")) if training_dataset else set()
+    cross_dataset = bool(trained_on) and run.get("dataset") not in trained_on
+    if cross_dataset and config.RUL_CROSS_DATASET_SMOOTHING_TAU_S > 0:
+        times = np.asarray(run["times"], dtype=np.float64)
+        prediction = _ema_time(prediction, times, config.RUL_CROSS_DATASET_SMOOTHING_TAU_S)
+    if config.RUL_MONOTONE_PREDICTION:
+        prediction = np.minimum.accumulate(prediction)
+    return np.clip(prediction, 0.0, 1.0)
 
 
 def _make_estimator(kind):
@@ -126,11 +199,11 @@ def _make_estimator(kind):
     return Pipeline([("scaler", StandardScaler()), ("model", model)])
 
 
-def _stack(runs):
+def _stack(runs, loudness_reference=None):
     xs, ys, groups = [], [], []
     names = None
     for run in runs:
-        matrix, names, _ = rul_features(run)
+        matrix, names, _ = rul_features(run, loudness_reference)
         xs.append(matrix)
         ys.append(run["rul_fraction"])
         groups.extend([run["run_id"]] * matrix.shape[0])
@@ -152,11 +225,24 @@ class RULModel(object):
         self.training_runs = []
         self.training_dataset = ""
         self.created = ""
+        # Model files saved before this setting existed used the START reference.
+        self.loudness_reference = "START"
+        self.fpt_floor = None           # None = no gate (also for older files)
 
-    def fit(self, runs):
-        x, y, _, names = _stack(runs)
+    def fit(self, runs, loudness_reference=None, fpt_gate=False):
+        reference = loudness_reference or config.RUL_LOUDNESS_REFERENCE
+        x, y, _, names = _stack(runs, reference)
+        self.fpt_floor = None
+        if fpt_gate:
+            at_fpt = []
+            for run in runs:
+                matrix, run_names, _ = rul_features(run, reference)
+                fpt = min(detect_fpt(run, matrix, run_names), matrix.shape[0] - 1)
+                at_fpt.append(float(run["rul_fraction"][fpt]))
+            self.fpt_floor = float(np.median(at_fpt))
         self.pipeline = _make_estimator(self.kind)
         self.pipeline.fit(x, y)
+        self.loudness_reference = reference
         self.feature_names = names
         self.training_runs = [r["run_id"] for r in runs]
         self.training_dataset = ",".join(sorted(set(r["dataset"] for r in runs)))
@@ -164,11 +250,14 @@ class RULModel(object):
         return self
 
     def predict_run(self, run):
-        matrix, names, health = rul_features(run)
+        matrix, names, health = rul_features(run, self.loudness_reference)
         if names != self.feature_names:
             raise ValueError("feature layout differs from the trained model")
         prediction = np.clip(self.pipeline.predict(matrix), 0.0, 1.0)
-        return prediction, health
+        if self.fpt_floor is not None:
+            fpt = detect_fpt(run, matrix, names)
+            prediction[:fpt] = np.maximum(prediction[:fpt], self.fpt_floor)
+        return postprocess_prediction(prediction, run, self.training_dataset), health
 
     def save(self, path):
         directory = os.path.dirname(path)
@@ -177,7 +266,9 @@ class RULModel(object):
         joblib.dump({"version": 1, "kind": self.kind, "pipeline": self.pipeline,
                      "feature_names": self.feature_names, "training_runs": self.training_runs,
                      "training_dataset": self.training_dataset, "created": self.created,
-                     "target": "RUL_fraction"}, path, compress=3)
+                     "target": "RUL_fraction",
+                     "loudness_reference": self.loudness_reference,
+                     "fpt_floor": self.fpt_floor}, path, compress=3)
         return path
 
     @classmethod
@@ -191,6 +282,8 @@ class RULModel(object):
         model.training_runs = data["training_runs"]
         model.training_dataset = data["training_dataset"]
         model.created = data["created"]
+        model.loudness_reference = data.get("loudness_reference", "START")
+        model.fpt_floor = data.get("fpt_floor")
         return model
 
 
@@ -245,13 +338,13 @@ def aggregate(metrics_list):
     return out
 
 
-def leave_one_run_out(runs, kind):
+def leave_one_run_out(runs, kind, loudness_reference=None, fpt_gate=False):
     """Cross validation by complete run. Returns per run metrics."""
     results = []
     for held_out in runs:
         train = [r for r in runs if r["run_id"] != held_out["run_id"]]
         assert_disjoint(train, [held_out])
-        model = RULModel(kind).fit(train)
+        model = RULModel(kind).fit(train, loudness_reference, fpt_gate)
         prediction, _ = model.predict_run(held_out)
         results.append(run_metrics(held_out, prediction))
     return results

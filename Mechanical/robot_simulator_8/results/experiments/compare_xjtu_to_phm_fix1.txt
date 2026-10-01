@@ -1,0 +1,364 @@
+
+=== LINEAR_REGRESSION
+Training LINEAR_REGRESSION, protocol XJTU_TO_PHM
+  [1/15] XJTU_SY: features for XJTU_Bearing1_1 (123 snapshots)
+  [2/15] XJTU_SY: features for XJTU_Bearing1_2 (161 snapshots)
+  [3/15] XJTU_SY: features for XJTU_Bearing1_3 (158 snapshots)
+  [4/15] XJTU_SY: features for XJTU_Bearing1_4 (122 snapshots)
+  [5/15] XJTU_SY: features for XJTU_Bearing1_5 (52 snapshots)
+  [6/15] XJTU_SY: features for XJTU_Bearing2_1 (491 snapshots)
+  [7/15] XJTU_SY: features for XJTU_Bearing2_2 (161 snapshots)
+  [8/15] XJTU_SY: features for XJTU_Bearing2_3 (533 snapshots)
+  [9/15] XJTU_SY: features for XJTU_Bearing2_4 (42 snapshots)
+  [10/15] XJTU_SY: features for XJTU_Bearing2_5 (339 snapshots)
+  [11/15] XJTU_SY: features for XJTU_Bearing3_1 (2538 snapshots)
+  [12/15] XJTU_SY: features for XJTU_Bearing3_2 (2496 snapshots)
+  [13/15] XJTU_SY: features for XJTU_Bearing3_3 (371 snapshots)
+  [14/15] XJTU_SY: features for XJTU_Bearing3_4 (1515 snapshots)
+  [15/15] XJTU_SY: features for XJTU_Bearing3_5 (114 snapshots)
+  [1/17] PHM2012: features for PHM_Bearing1_1 (2803 snapshots)
+  [2/17] PHM2012: features for PHM_Bearing1_2 (871 snapshots)
+  [3/17] PHM2012: features for PHM_Bearing2_1 (911 snapshots)
+  [4/17] PHM2012: features for PHM_Bearing2_2 (797 snapshots)
+  [5/17] PHM2012: features for PHM_Bearing3_1 (515 snapshots)
+  [6/17] PHM2012: features for PHM_Bearing3_2 (1637 snapshots)
+  [7/17] PHM2012: features for PHM_Bearing1_3 (2375 snapshots)
+  [8/17] PHM2012: features for PHM_Bearing1_4 (1428 snapshots)
+  [9/17] PHM2012: features for PHM_Bearing1_5 (2463 snapshots)
+  [10/17] PHM2012: features for PHM_Bearing1_6 (2448 snapshots)
+  [11/17] PHM2012: features for PHM_Bearing1_7 (2259 snapshots)
+  [12/17] PHM2012: features for PHM_Bearing2_3 (1955 snapshots)
+  [13/17] PHM2012: features for PHM_Bearing2_4 (751 snapshots)
+  [14/17] PHM2012: features for PHM_Bearing2_5 (2311 snapshots)
+  [15/17] PHM2012: features for PHM_Bearing2_6 (701 snapshots)
+  [16/17] PHM2012: features for PHM_Bearing2_7 (230 snapshots)
+  [17/17] PHM2012: features for PHM_Bearing3_3 (434 snapshots)
+  Leave one run out cross validation (15 folds)
+  Fitting LINEAR_REGRESSION on 15 training runs
+Training bearings  : XJTU_Bearing1_1, XJTU_Bearing1_2, XJTU_Bearing1_3, XJTU_Bearing1_4, XJTU_Bearing1_5, XJTU_Bearing2_1, XJTU_Bearing2_2, XJTU_Bearing2_3, XJTU_Bearing2_4, XJTU_Bearing2_5, XJTU_Bearing3_1, XJTU_Bearing3_2, XJTU_Bearing3_3, XJTU_Bearing3_4, XJTU_Bearing3_5
+Validation bearings: PHM_Bearing1_1, PHM_Bearing1_2, PHM_Bearing2_1, PHM_Bearing2_2, PHM_Bearing3_1, PHM_Bearing3_2, PHM_Bearing1_3, PHM_Bearing1_4, PHM_Bearing1_5, PHM_Bearing1_6, PHM_Bearing1_7, PHM_Bearing2_3, PHM_Bearing2_4, PHM_Bearing2_5, PHM_Bearing2_6, PHM_Bearing2_7, PHM_Bearing3_3  (never used for training)
+
+Leave one bearing out cross validation (training set)
+  bearing            condition          life h     MAE    RMSE     R2   rank  late err %
+  XJTU_Bearing1_1    35Hz12kN             2.03   0.139   0.176   0.64   0.86        11.6
+  XJTU_Bearing1_2    35Hz12kN             2.67   0.254   0.309  -0.13   0.89        25.0
+  XJTU_Bearing1_3    35Hz12kN             2.62   0.230   0.276   0.09   0.69       116.9
+  XJTU_Bearing1_4    35Hz12kN             2.02   0.358   0.437  -1.26   0.26       485.7
+  XJTU_Bearing1_5    35Hz12kN             0.85   0.150   0.181   0.62   0.91        45.8
+  XJTU_Bearing2_1    37.5Hz11kN           8.17   0.273   0.335  -0.34   0.57       162.0
+  XJTU_Bearing2_2    37.5Hz11kN           2.67   0.146   0.168   0.67   0.85        18.1
+  XJTU_Bearing2_3    37.5Hz11kN           8.87   0.284   0.329  -0.29   0.69        29.0
+  XJTU_Bearing2_4    37.5Hz11kN           0.68   0.250   0.290   0.04   0.63       146.4
+  XJTU_Bearing2_5    37.5Hz11kN           5.63   0.110   0.145   0.75   0.86        16.0
+  XJTU_Bearing3_1    40Hz10kN            42.28   0.160   0.205   0.50   0.88        48.7
+  XJTU_Bearing3_2    40Hz10kN            41.58   0.219   0.271   0.12   0.19        44.7
+  XJTU_Bearing3_3    40Hz10kN             6.17   0.253   0.314  -0.18   0.90       142.5
+  XJTU_Bearing3_4    40Hz10kN            25.23   0.196   0.241   0.30   0.84        75.0
+  XJTU_Bearing3_5    40Hz10kN             1.88   0.118   0.139   0.77   0.89        17.9
+  cross validation: MAE 0.209  RMSE 0.254  R2 0.15  rank 0.73  (MAE = 20.9% of life, 15 bearings)
+
+Saved models/rul_linear_regression_xjtu_to_phm_20260928_233516.joblib
+Next: python -m tools.rul evaluate --model-file models/rul_linear_regression_xjtu_to_phm_20260928_233516.joblib --protocol XJTU_TO_PHM
+  [1/15] XJTU_SY: features for XJTU_Bearing1_1 (123 snapshots)
+  [2/15] XJTU_SY: features for XJTU_Bearing1_2 (161 snapshots)
+  [3/15] XJTU_SY: features for XJTU_Bearing1_3 (158 snapshots)
+  [4/15] XJTU_SY: features for XJTU_Bearing1_4 (122 snapshots)
+  [5/15] XJTU_SY: features for XJTU_Bearing1_5 (52 snapshots)
+  [6/15] XJTU_SY: features for XJTU_Bearing2_1 (491 snapshots)
+  [7/15] XJTU_SY: features for XJTU_Bearing2_2 (161 snapshots)
+  [8/15] XJTU_SY: features for XJTU_Bearing2_3 (533 snapshots)
+  [9/15] XJTU_SY: features for XJTU_Bearing2_4 (42 snapshots)
+  [10/15] XJTU_SY: features for XJTU_Bearing2_5 (339 snapshots)
+  [11/15] XJTU_SY: features for XJTU_Bearing3_1 (2538 snapshots)
+  [12/15] XJTU_SY: features for XJTU_Bearing3_2 (2496 snapshots)
+  [13/15] XJTU_SY: features for XJTU_Bearing3_3 (371 snapshots)
+  [14/15] XJTU_SY: features for XJTU_Bearing3_4 (1515 snapshots)
+  [15/15] XJTU_SY: features for XJTU_Bearing3_5 (114 snapshots)
+  [1/17] PHM2012: features for PHM_Bearing1_1 (2803 snapshots)
+  [2/17] PHM2012: features for PHM_Bearing1_2 (871 snapshots)
+  [3/17] PHM2012: features for PHM_Bearing2_1 (911 snapshots)
+  [4/17] PHM2012: features for PHM_Bearing2_2 (797 snapshots)
+  [5/17] PHM2012: features for PHM_Bearing3_1 (515 snapshots)
+  [6/17] PHM2012: features for PHM_Bearing3_2 (1637 snapshots)
+  [7/17] PHM2012: features for PHM_Bearing1_3 (2375 snapshots)
+  [8/17] PHM2012: features for PHM_Bearing1_4 (1428 snapshots)
+  [9/17] PHM2012: features for PHM_Bearing1_5 (2463 snapshots)
+  [10/17] PHM2012: features for PHM_Bearing1_6 (2448 snapshots)
+  [11/17] PHM2012: features for PHM_Bearing1_7 (2259 snapshots)
+  [12/17] PHM2012: features for PHM_Bearing2_3 (1955 snapshots)
+  [13/17] PHM2012: features for PHM_Bearing2_4 (751 snapshots)
+  [14/17] PHM2012: features for PHM_Bearing2_5 (2311 snapshots)
+  [15/17] PHM2012: features for PHM_Bearing2_6 (701 snapshots)
+  [16/17] PHM2012: features for PHM_Bearing2_7 (230 snapshots)
+  [17/17] PHM2012: features for PHM_Bearing3_3 (434 snapshots)
+Model LINEAR_REGRESSION trained on XJTU_SY (XJTU_TO_PHM)
+
+Validation on unseen bearings
+  bearing            condition          life h     MAE    RMSE     R2   rank  late err %
+  PHM_Bearing1_1     1800rpm_4000N        7.78   0.348   0.392  -0.84   0.97        24.6
+  PHM_Bearing1_2     1800rpm_4000N        2.42   0.210   0.256   0.22   0.82        90.9
+  PHM_Bearing2_1     1650rpm_4200N        2.53   0.336   0.382  -0.75   1.00        24.8
+  PHM_Bearing2_2     1650rpm_4200N        2.21   0.254   0.298  -0.07   1.00        24.3
+  PHM_Bearing3_1     1500rpm_5000N        1.43   0.088   0.123   0.82   1.00        24.5
+  PHM_Bearing3_2     1500rpm_5000N        4.54   0.389   0.441  -1.33   0.67        25.2
+  PHM_Bearing1_3     1800rpm_4000N        6.59   0.235   0.259   0.20   0.85        19.8
+  PHM_Bearing1_4     1800rpm_4000N        3.96   0.092   0.118   0.83   1.00        25.9
+  PHM_Bearing1_5     1800rpm_4000N        6.84   0.349   0.398  -0.90   0.89        25.3
+  PHM_Bearing1_6     1800rpm_4000N        6.80   0.184   0.205   0.50   0.91        16.2
+  PHM_Bearing1_7     1800rpm_4000N        6.27   0.261   0.318  -0.21   0.54        16.0
+  PHM_Bearing2_3     1650rpm_4200N        5.43   0.263   0.330  -0.31   0.82        15.6
+  PHM_Bearing2_4     1650rpm_4200N        2.08   0.070   0.087   0.91   1.00         6.5
+  PHM_Bearing2_5     1650rpm_4200N        6.42   0.434   0.501  -2.01   0.58        25.3
+  PHM_Bearing2_6     1650rpm_4200N        1.94   0.111   0.137   0.77   1.00        17.3
+  PHM_Bearing2_7     1650rpm_4200N        0.64   0.341   0.393  -0.84   0.98       206.5
+  PHM_Bearing3_3     1500rpm_5000N        1.20   0.081   0.100   0.88   0.99         4.6
+  validation: MAE 0.238  RMSE 0.279  R2 -0.13  rank 0.88  (MAE = 23.8% of life, 17 bearings)
+
+  rank = Spearman correlation between true and predicted RUL: is the order right?
+  late err % = error of the predicted remaining TIME, from 50% of life onwards,
+  as a percent of total life (early in life the time estimate is unstable).
+
+=== RANDOM_FOREST
+Training RANDOM_FOREST, protocol XJTU_TO_PHM
+  [1/15] XJTU_SY: features for XJTU_Bearing1_1 (123 snapshots)
+  [2/15] XJTU_SY: features for XJTU_Bearing1_2 (161 snapshots)
+  [3/15] XJTU_SY: features for XJTU_Bearing1_3 (158 snapshots)
+  [4/15] XJTU_SY: features for XJTU_Bearing1_4 (122 snapshots)
+  [5/15] XJTU_SY: features for XJTU_Bearing1_5 (52 snapshots)
+  [6/15] XJTU_SY: features for XJTU_Bearing2_1 (491 snapshots)
+  [7/15] XJTU_SY: features for XJTU_Bearing2_2 (161 snapshots)
+  [8/15] XJTU_SY: features for XJTU_Bearing2_3 (533 snapshots)
+  [9/15] XJTU_SY: features for XJTU_Bearing2_4 (42 snapshots)
+  [10/15] XJTU_SY: features for XJTU_Bearing2_5 (339 snapshots)
+  [11/15] XJTU_SY: features for XJTU_Bearing3_1 (2538 snapshots)
+  [12/15] XJTU_SY: features for XJTU_Bearing3_2 (2496 snapshots)
+  [13/15] XJTU_SY: features for XJTU_Bearing3_3 (371 snapshots)
+  [14/15] XJTU_SY: features for XJTU_Bearing3_4 (1515 snapshots)
+  [15/15] XJTU_SY: features for XJTU_Bearing3_5 (114 snapshots)
+  [1/17] PHM2012: features for PHM_Bearing1_1 (2803 snapshots)
+  [2/17] PHM2012: features for PHM_Bearing1_2 (871 snapshots)
+  [3/17] PHM2012: features for PHM_Bearing2_1 (911 snapshots)
+  [4/17] PHM2012: features for PHM_Bearing2_2 (797 snapshots)
+  [5/17] PHM2012: features for PHM_Bearing3_1 (515 snapshots)
+  [6/17] PHM2012: features for PHM_Bearing3_2 (1637 snapshots)
+  [7/17] PHM2012: features for PHM_Bearing1_3 (2375 snapshots)
+  [8/17] PHM2012: features for PHM_Bearing1_4 (1428 snapshots)
+  [9/17] PHM2012: features for PHM_Bearing1_5 (2463 snapshots)
+  [10/17] PHM2012: features for PHM_Bearing1_6 (2448 snapshots)
+  [11/17] PHM2012: features for PHM_Bearing1_7 (2259 snapshots)
+  [12/17] PHM2012: features for PHM_Bearing2_3 (1955 snapshots)
+  [13/17] PHM2012: features for PHM_Bearing2_4 (751 snapshots)
+  [14/17] PHM2012: features for PHM_Bearing2_5 (2311 snapshots)
+  [15/17] PHM2012: features for PHM_Bearing2_6 (701 snapshots)
+  [16/17] PHM2012: features for PHM_Bearing2_7 (230 snapshots)
+  [17/17] PHM2012: features for PHM_Bearing3_3 (434 snapshots)
+  Leave one run out cross validation (15 folds)
+  Fitting RANDOM_FOREST on 15 training runs
+Training bearings  : XJTU_Bearing1_1, XJTU_Bearing1_2, XJTU_Bearing1_3, XJTU_Bearing1_4, XJTU_Bearing1_5, XJTU_Bearing2_1, XJTU_Bearing2_2, XJTU_Bearing2_3, XJTU_Bearing2_4, XJTU_Bearing2_5, XJTU_Bearing3_1, XJTU_Bearing3_2, XJTU_Bearing3_3, XJTU_Bearing3_4, XJTU_Bearing3_5
+Validation bearings: PHM_Bearing1_1, PHM_Bearing1_2, PHM_Bearing2_1, PHM_Bearing2_2, PHM_Bearing3_1, PHM_Bearing3_2, PHM_Bearing1_3, PHM_Bearing1_4, PHM_Bearing1_5, PHM_Bearing1_6, PHM_Bearing1_7, PHM_Bearing2_3, PHM_Bearing2_4, PHM_Bearing2_5, PHM_Bearing2_6, PHM_Bearing2_7, PHM_Bearing3_3  (never used for training)
+
+Leave one bearing out cross validation (training set)
+  bearing            condition          life h     MAE    RMSE     R2   rank  late err %
+  XJTU_Bearing1_1    35Hz12kN             2.03   0.079   0.097   0.89   0.90        15.3
+  XJTU_Bearing1_2    35Hz12kN             2.67   0.204   0.250   0.26   0.81        19.6
+  XJTU_Bearing1_3    35Hz12kN             2.62   0.137   0.165   0.68   0.94        38.0
+  XJTU_Bearing1_4    35Hz12kN             2.02   0.241   0.280   0.07   0.95        91.8
+  XJTU_Bearing1_5    35Hz12kN             0.85   0.242   0.294  -0.00   0.77       315.1
+  XJTU_Bearing2_1    37.5Hz11kN           8.17   0.264   0.330  -0.30   0.94       161.5
+  XJTU_Bearing2_2    37.5Hz11kN           2.67   0.162   0.193   0.56   0.97        19.5
+  XJTU_Bearing2_3    37.5Hz11kN           8.87   0.220   0.246   0.28   0.97        18.1
+  XJTU_Bearing2_4    37.5Hz11kN           0.68   0.211   0.258   0.24   0.92        97.9
+  XJTU_Bearing2_5    37.5Hz11kN           5.63   0.104   0.131   0.80   0.91        15.5
+  XJTU_Bearing3_1    40Hz10kN            42.28   0.184   0.215   0.45   0.81        27.8
+  XJTU_Bearing3_2    40Hz10kN            41.58   0.143   0.176   0.63   0.77        20.2
+  XJTU_Bearing3_3    40Hz10kN             6.17   0.326   0.408  -0.99  -0.18       385.7
+  XJTU_Bearing3_4    40Hz10kN            25.23   0.200   0.243   0.29   0.82        80.6
+  XJTU_Bearing3_5    40Hz10kN             1.88   0.256   0.298  -0.05   0.98        16.6
+  cross validation: MAE 0.198  RMSE 0.239  R2 0.25  rank 0.82  (MAE = 19.8% of life, 15 bearings)
+
+Saved models/rul_random_forest_xjtu_to_phm_20260928_233905.joblib
+Next: python -m tools.rul evaluate --model-file models/rul_random_forest_xjtu_to_phm_20260928_233905.joblib --protocol XJTU_TO_PHM
+  [1/15] XJTU_SY: features for XJTU_Bearing1_1 (123 snapshots)
+  [2/15] XJTU_SY: features for XJTU_Bearing1_2 (161 snapshots)
+  [3/15] XJTU_SY: features for XJTU_Bearing1_3 (158 snapshots)
+  [4/15] XJTU_SY: features for XJTU_Bearing1_4 (122 snapshots)
+  [5/15] XJTU_SY: features for XJTU_Bearing1_5 (52 snapshots)
+  [6/15] XJTU_SY: features for XJTU_Bearing2_1 (491 snapshots)
+  [7/15] XJTU_SY: features for XJTU_Bearing2_2 (161 snapshots)
+  [8/15] XJTU_SY: features for XJTU_Bearing2_3 (533 snapshots)
+  [9/15] XJTU_SY: features for XJTU_Bearing2_4 (42 snapshots)
+  [10/15] XJTU_SY: features for XJTU_Bearing2_5 (339 snapshots)
+  [11/15] XJTU_SY: features for XJTU_Bearing3_1 (2538 snapshots)
+  [12/15] XJTU_SY: features for XJTU_Bearing3_2 (2496 snapshots)
+  [13/15] XJTU_SY: features for XJTU_Bearing3_3 (371 snapshots)
+  [14/15] XJTU_SY: features for XJTU_Bearing3_4 (1515 snapshots)
+  [15/15] XJTU_SY: features for XJTU_Bearing3_5 (114 snapshots)
+  [1/17] PHM2012: features for PHM_Bearing1_1 (2803 snapshots)
+  [2/17] PHM2012: features for PHM_Bearing1_2 (871 snapshots)
+  [3/17] PHM2012: features for PHM_Bearing2_1 (911 snapshots)
+  [4/17] PHM2012: features for PHM_Bearing2_2 (797 snapshots)
+  [5/17] PHM2012: features for PHM_Bearing3_1 (515 snapshots)
+  [6/17] PHM2012: features for PHM_Bearing3_2 (1637 snapshots)
+  [7/17] PHM2012: features for PHM_Bearing1_3 (2375 snapshots)
+  [8/17] PHM2012: features for PHM_Bearing1_4 (1428 snapshots)
+  [9/17] PHM2012: features for PHM_Bearing1_5 (2463 snapshots)
+  [10/17] PHM2012: features for PHM_Bearing1_6 (2448 snapshots)
+  [11/17] PHM2012: features for PHM_Bearing1_7 (2259 snapshots)
+  [12/17] PHM2012: features for PHM_Bearing2_3 (1955 snapshots)
+  [13/17] PHM2012: features for PHM_Bearing2_4 (751 snapshots)
+  [14/17] PHM2012: features for PHM_Bearing2_5 (2311 snapshots)
+  [15/17] PHM2012: features for PHM_Bearing2_6 (701 snapshots)
+  [16/17] PHM2012: features for PHM_Bearing2_7 (230 snapshots)
+  [17/17] PHM2012: features for PHM_Bearing3_3 (434 snapshots)
+Model RANDOM_FOREST trained on XJTU_SY (XJTU_TO_PHM)
+
+Validation on unseen bearings
+  bearing            condition          life h     MAE    RMSE     R2   rank  late err %
+  PHM_Bearing1_1     1800rpm_4000N        7.78   0.283   0.337  -0.36   0.18        19.6
+  PHM_Bearing1_2     1800rpm_4000N        2.42   0.173   0.201   0.52   1.00        16.4
+  PHM_Bearing2_1     1650rpm_4200N        2.53   0.224   0.264   0.16   0.91        13.8
+  PHM_Bearing2_2     1650rpm_4200N        2.21   0.207   0.233   0.35   0.60        18.1
+  PHM_Bearing3_1     1500rpm_5000N        1.43   0.179   0.200   0.52   1.00        58.4
+  PHM_Bearing3_2     1500rpm_5000N        4.54   0.205   0.249   0.26   0.88        15.3
+  PHM_Bearing1_3     1800rpm_4000N        6.59   0.159   0.171   0.65   0.89        15.4
+  PHM_Bearing1_4     1800rpm_4000N        3.96   0.145   0.179   0.62   0.98         8.6
+  PHM_Bearing1_5     1800rpm_4000N        6.84   0.195   0.220   0.42   0.88        19.8
+  PHM_Bearing1_6     1800rpm_4000N        6.80   0.273   0.322  -0.24   0.85        19.3
+  PHM_Bearing1_7     1800rpm_4000N        6.27   0.215   0.237   0.33   0.83        17.8
+  PHM_Bearing2_3     1650rpm_4200N        5.43   0.249   0.296  -0.05   0.32        20.3
+  PHM_Bearing2_4     1650rpm_4200N        2.08   0.106   0.157   0.70   0.98        33.2
+  PHM_Bearing2_5     1650rpm_4200N        6.42   0.248   0.291  -0.02   0.57        20.9
+  PHM_Bearing2_6     1650rpm_4200N        1.94   0.103   0.132   0.79   1.00        15.5
+  PHM_Bearing2_7     1650rpm_4200N        0.64   0.284   0.322  -0.23   1.00       131.2
+  PHM_Bearing3_3     1500rpm_5000N        1.20   0.082   0.106   0.87   0.98        16.1
+  validation: MAE 0.196  RMSE 0.230  R2 0.31  rank 0.81  (MAE = 19.6% of life, 17 bearings)
+
+  rank = Spearman correlation between true and predicted RUL: is the order right?
+  late err % = error of the predicted remaining TIME, from 50% of life onwards,
+  as a percent of total life (early in life the time estimate is unstable).
+
+=== GRADIENT_BOOSTING
+Training GRADIENT_BOOSTING, protocol XJTU_TO_PHM
+  [1/15] XJTU_SY: features for XJTU_Bearing1_1 (123 snapshots)
+  [2/15] XJTU_SY: features for XJTU_Bearing1_2 (161 snapshots)
+  [3/15] XJTU_SY: features for XJTU_Bearing1_3 (158 snapshots)
+  [4/15] XJTU_SY: features for XJTU_Bearing1_4 (122 snapshots)
+  [5/15] XJTU_SY: features for XJTU_Bearing1_5 (52 snapshots)
+  [6/15] XJTU_SY: features for XJTU_Bearing2_1 (491 snapshots)
+  [7/15] XJTU_SY: features for XJTU_Bearing2_2 (161 snapshots)
+  [8/15] XJTU_SY: features for XJTU_Bearing2_3 (533 snapshots)
+  [9/15] XJTU_SY: features for XJTU_Bearing2_4 (42 snapshots)
+  [10/15] XJTU_SY: features for XJTU_Bearing2_5 (339 snapshots)
+  [11/15] XJTU_SY: features for XJTU_Bearing3_1 (2538 snapshots)
+  [12/15] XJTU_SY: features for XJTU_Bearing3_2 (2496 snapshots)
+  [13/15] XJTU_SY: features for XJTU_Bearing3_3 (371 snapshots)
+  [14/15] XJTU_SY: features for XJTU_Bearing3_4 (1515 snapshots)
+  [15/15] XJTU_SY: features for XJTU_Bearing3_5 (114 snapshots)
+  [1/17] PHM2012: features for PHM_Bearing1_1 (2803 snapshots)
+  [2/17] PHM2012: features for PHM_Bearing1_2 (871 snapshots)
+  [3/17] PHM2012: features for PHM_Bearing2_1 (911 snapshots)
+  [4/17] PHM2012: features for PHM_Bearing2_2 (797 snapshots)
+  [5/17] PHM2012: features for PHM_Bearing3_1 (515 snapshots)
+  [6/17] PHM2012: features for PHM_Bearing3_2 (1637 snapshots)
+  [7/17] PHM2012: features for PHM_Bearing1_3 (2375 snapshots)
+  [8/17] PHM2012: features for PHM_Bearing1_4 (1428 snapshots)
+  [9/17] PHM2012: features for PHM_Bearing1_5 (2463 snapshots)
+  [10/17] PHM2012: features for PHM_Bearing1_6 (2448 snapshots)
+  [11/17] PHM2012: features for PHM_Bearing1_7 (2259 snapshots)
+  [12/17] PHM2012: features for PHM_Bearing2_3 (1955 snapshots)
+  [13/17] PHM2012: features for PHM_Bearing2_4 (751 snapshots)
+  [14/17] PHM2012: features for PHM_Bearing2_5 (2311 snapshots)
+  [15/17] PHM2012: features for PHM_Bearing2_6 (701 snapshots)
+  [16/17] PHM2012: features for PHM_Bearing2_7 (230 snapshots)
+  [17/17] PHM2012: features for PHM_Bearing3_3 (434 snapshots)
+  Leave one run out cross validation (15 folds)
+  Fitting GRADIENT_BOOSTING on 15 training runs
+Training bearings  : XJTU_Bearing1_1, XJTU_Bearing1_2, XJTU_Bearing1_3, XJTU_Bearing1_4, XJTU_Bearing1_5, XJTU_Bearing2_1, XJTU_Bearing2_2, XJTU_Bearing2_3, XJTU_Bearing2_4, XJTU_Bearing2_5, XJTU_Bearing3_1, XJTU_Bearing3_2, XJTU_Bearing3_3, XJTU_Bearing3_4, XJTU_Bearing3_5
+Validation bearings: PHM_Bearing1_1, PHM_Bearing1_2, PHM_Bearing2_1, PHM_Bearing2_2, PHM_Bearing3_1, PHM_Bearing3_2, PHM_Bearing1_3, PHM_Bearing1_4, PHM_Bearing1_5, PHM_Bearing1_6, PHM_Bearing1_7, PHM_Bearing2_3, PHM_Bearing2_4, PHM_Bearing2_5, PHM_Bearing2_6, PHM_Bearing2_7, PHM_Bearing3_3  (never used for training)
+
+Leave one bearing out cross validation (training set)
+  bearing            condition          life h     MAE    RMSE     R2   rank  late err %
+  XJTU_Bearing1_1    35Hz12kN             2.03   0.094   0.112   0.85   0.88        14.5
+  XJTU_Bearing1_2    35Hz12kN             2.67   0.176   0.230   0.37   0.73        14.9
+  XJTU_Bearing1_3    35Hz12kN             2.62   0.120   0.136   0.78   0.90        24.3
+  XJTU_Bearing1_4    35Hz12kN             2.02   0.258   0.287   0.03   0.96       110.5
+  XJTU_Bearing1_5    35Hz12kN             0.85   0.241   0.291   0.02   0.91       369.8
+  XJTU_Bearing2_1    37.5Hz11kN           8.17   0.264   0.325  -0.26   0.46       153.2
+  XJTU_Bearing2_2    37.5Hz11kN           2.67   0.113   0.138   0.77   0.97        14.0
+  XJTU_Bearing2_3    37.5Hz11kN           8.87   0.232   0.258   0.21   0.93        17.5
+  XJTU_Bearing2_4    37.5Hz11kN           0.68   0.172   0.203   0.53   0.95        60.9
+  XJTU_Bearing2_5    37.5Hz11kN           5.63   0.104   0.124   0.82   0.94        13.5
+  XJTU_Bearing3_1    40Hz10kN            42.28   0.191   0.225   0.39   0.85        15.2
+  XJTU_Bearing3_2    40Hz10kN            41.58   0.152   0.195   0.54   0.81        17.1
+  XJTU_Bearing3_3    40Hz10kN             6.17   0.334   0.413  -1.03   0.14       430.8
+  XJTU_Bearing3_4    40Hz10kN            25.23   0.215   0.251   0.24   0.69        92.9
+  XJTU_Bearing3_5    40Hz10kN             1.88   0.246   0.300  -0.06   0.90        13.5
+  cross validation: MAE 0.194  RMSE 0.233  R2 0.28  rank 0.80  (MAE = 19.4% of life, 15 bearings)
+
+Saved models/rul_gradient_boosting_xjtu_to_phm_20260928_234142.joblib
+Next: python -m tools.rul evaluate --model-file models/rul_gradient_boosting_xjtu_to_phm_20260928_234142.joblib --protocol XJTU_TO_PHM
+  [1/15] XJTU_SY: features for XJTU_Bearing1_1 (123 snapshots)
+  [2/15] XJTU_SY: features for XJTU_Bearing1_2 (161 snapshots)
+  [3/15] XJTU_SY: features for XJTU_Bearing1_3 (158 snapshots)
+  [4/15] XJTU_SY: features for XJTU_Bearing1_4 (122 snapshots)
+  [5/15] XJTU_SY: features for XJTU_Bearing1_5 (52 snapshots)
+  [6/15] XJTU_SY: features for XJTU_Bearing2_1 (491 snapshots)
+  [7/15] XJTU_SY: features for XJTU_Bearing2_2 (161 snapshots)
+  [8/15] XJTU_SY: features for XJTU_Bearing2_3 (533 snapshots)
+  [9/15] XJTU_SY: features for XJTU_Bearing2_4 (42 snapshots)
+  [10/15] XJTU_SY: features for XJTU_Bearing2_5 (339 snapshots)
+  [11/15] XJTU_SY: features for XJTU_Bearing3_1 (2538 snapshots)
+  [12/15] XJTU_SY: features for XJTU_Bearing3_2 (2496 snapshots)
+  [13/15] XJTU_SY: features for XJTU_Bearing3_3 (371 snapshots)
+  [14/15] XJTU_SY: features for XJTU_Bearing3_4 (1515 snapshots)
+  [15/15] XJTU_SY: features for XJTU_Bearing3_5 (114 snapshots)
+  [1/17] PHM2012: features for PHM_Bearing1_1 (2803 snapshots)
+  [2/17] PHM2012: features for PHM_Bearing1_2 (871 snapshots)
+  [3/17] PHM2012: features for PHM_Bearing2_1 (911 snapshots)
+  [4/17] PHM2012: features for PHM_Bearing2_2 (797 snapshots)
+  [5/17] PHM2012: features for PHM_Bearing3_1 (515 snapshots)
+  [6/17] PHM2012: features for PHM_Bearing3_2 (1637 snapshots)
+  [7/17] PHM2012: features for PHM_Bearing1_3 (2375 snapshots)
+  [8/17] PHM2012: features for PHM_Bearing1_4 (1428 snapshots)
+  [9/17] PHM2012: features for PHM_Bearing1_5 (2463 snapshots)
+  [10/17] PHM2012: features for PHM_Bearing1_6 (2448 snapshots)
+  [11/17] PHM2012: features for PHM_Bearing1_7 (2259 snapshots)
+  [12/17] PHM2012: features for PHM_Bearing2_3 (1955 snapshots)
+  [13/17] PHM2012: features for PHM_Bearing2_4 (751 snapshots)
+  [14/17] PHM2012: features for PHM_Bearing2_5 (2311 snapshots)
+  [15/17] PHM2012: features for PHM_Bearing2_6 (701 snapshots)
+  [16/17] PHM2012: features for PHM_Bearing2_7 (230 snapshots)
+  [17/17] PHM2012: features for PHM_Bearing3_3 (434 snapshots)
+Model GRADIENT_BOOSTING trained on XJTU_SY (XJTU_TO_PHM)
+
+Validation on unseen bearings
+  bearing            condition          life h     MAE    RMSE     R2   rank  late err %
+  PHM_Bearing1_1     1800rpm_4000N        7.78   0.258   0.306  -0.12   0.67        17.4
+  PHM_Bearing1_2     1800rpm_4000N        2.42   0.235   0.268   0.14   0.84        20.7
+  PHM_Bearing2_1     1650rpm_4200N        2.53   0.168   0.198   0.53   1.00        12.7
+  PHM_Bearing2_2     1650rpm_4200N        2.21   0.206   0.247   0.27   0.99        14.0
+  PHM_Bearing3_1     1500rpm_5000N        1.43   0.161   0.183   0.60   1.00        49.9
+  PHM_Bearing3_2     1500rpm_5000N        4.54   0.272   0.334  -0.33   0.30        15.8
+  PHM_Bearing1_3     1800rpm_4000N        6.59   0.202   0.248   0.27   0.84         9.9
+  PHM_Bearing1_4     1800rpm_4000N        3.96   0.227   0.278   0.08   0.90        12.7
+  PHM_Bearing1_5     1800rpm_4000N        6.84   0.323   0.378  -0.72   0.57        18.9
+  PHM_Bearing1_6     1800rpm_4000N        6.80   0.186   0.213   0.46   0.95        16.0
+  PHM_Bearing1_7     1800rpm_4000N        6.27   0.320   0.379  -0.72   0.27        16.9
+  PHM_Bearing2_3     1650rpm_4200N        5.43   0.284   0.344  -0.41   0.55        17.6
+  PHM_Bearing2_4     1650rpm_4200N        2.08   0.088   0.104   0.87   1.00         9.7
+  PHM_Bearing2_5     1650rpm_4200N        6.42   0.326   0.385  -0.77   0.25        19.5
+  PHM_Bearing2_6     1650rpm_4200N        1.94   0.069   0.086   0.91   1.00        12.7
+  PHM_Bearing2_7     1650rpm_4200N        0.64   0.312   0.350  -0.46   1.00       159.6
+  PHM_Bearing3_3     1500rpm_5000N        1.20   0.143   0.160   0.69   0.84        19.3
+  validation: MAE 0.222  RMSE 0.262  R2 0.08  rank 0.76  (MAE = 22.2% of life, 17 bearings)
+
+  rank = Spearman correlation between true and predicted RUL: is the order right?
+  late err % = error of the predicted remaining TIME, from 50% of life onwards,
+  as a percent of total life (early in life the time estimate is unstable).
+
+SUMMARY (XJTU_TO_PHM)
+  model                  cross val MAE / R2     validation MAE / RMSE / R2
+  LINEAR_REGRESSION       0.209 / 0.15            0.238 / 0.279  / -0.13 
+  RANDOM_FOREST           0.198 / 0.25            0.196 / 0.230  / 0.31  
+  GRADIENT_BOOSTING       0.194 / 0.28            0.222 / 0.262  / 0.08  
+  lowest validation MAE: RANDOM_FOREST

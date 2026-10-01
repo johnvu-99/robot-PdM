@@ -884,6 +884,39 @@ validation error. Per bearing it ranges from R2 0.77 (Bearing2_7) to -0.66
 (Bearing1_5), and its rank correlation from 0.94 down to -0.41 (Bearing2_5), so
 on some PHM bearings it does not even get the order right.
 
+**Cross-dataset smoothing** (`RUL_CROSS_DATASET_SMOOTHING_TAU_S = 900`, added
+28 Sep). Per snapshot predictions of an XJTU-trained model on PHM are noisy, so
+they are smoothed with a 15 minute EMA (causal, past snapshots only) whenever a
+model predicts on a dataset it was not trained on. Chosen on the PHM
+Learning_set, confirmed on the 11 Full_Test bearings:
+
+| Model | PHM validation MAE / R2 / rank, before -> after |
+| --- | --- |
+| Linear regression | 0.311 / -0.83 / 0.74 -> 0.247 / -0.25 / 0.98 |
+| **Random forest** | 0.216 / 0.15 / 0.53 -> **0.203 / 0.27 / 0.66** |
+| Gradient boosting | 0.268 / -0.35 / 0.65 -> 0.227 / -0.00 / 0.80 |
+
+**Update 29 Sep: Fixes 1 and 4.** Loudness is now measured from the quietest the
+bearing has been so far (many PHM bearings start rough and settle, so "growth
+since the start" went negative), and before degradation is detected the
+prediction is not allowed to drop below the level the training bearings had at
+that point. Both apply to XJTU -> PHM only; PHM -> PHM is unchanged.
+
+| Model | PHM validation MAE / R2 / rank, start -> now |
+| --- | --- |
+| Linear regression | 0.311 / -0.83 / 0.74 -> 0.219 / -0.02 / 0.90 |
+| **Random forest** | 0.216 / 0.15 / 0.53 -> **0.181 / 0.39 / 0.82** |
+| Gradient boosting | 0.268 / -0.35 / 0.65 -> 0.194 / 0.25 / 0.80 |
+
+XJTU -> PHM now beats training on PHM itself (0.198 / 0.22 / 0.83). Every
+experiment, including the rejected ones, and the reasoning behind each is in
+[CODE_GUIDE_MECHANICAL.md](CODE_GUIDE_MECHANICAL.md), section 9.
+
+Forcing the prediction to only go down (`RUL_MONOTONE_PREDICTION`) was tested
+and left off: it pushes rank to 0.94 - 1.00 for every model, even ones with
+negative R2, so rank stops meaning anything. Bearing2_5 and Bearing1_5 are still
+predicted in the wrong order. See `results/baseline_2026-09-28/`.
+
 An earlier measurement against a partial PHM download (7 bearings, every third
 snapshot) gave random forest MAE 0.173, R2 0.47, rank 0.77. The full set is
 clearly harder, and training on PHM's own Learning_set (0.198 / 0.22 / 0.83,

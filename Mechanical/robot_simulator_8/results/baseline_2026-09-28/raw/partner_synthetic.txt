@@ -1,0 +1,47 @@
+Example dataset (fault_labels, SYNTHETIC) written to <temp>/partner_example: 12 files
+Dataset partner_robot_joint_data_example: csv, 12 recordings, 12 runs, label_mode fault_labels
+Channels: position (position, rad), target (target_position, rad), velocity (velocity, rad/s), torque (torque, N m), current (current, A), power (power, W), accel (vibration, g), motor_temp (temperature, C), ambient (ambient_temperature, C)
+Labels (runs per label): {'HEALTHY': 4, 'FRICTION': 2, 'BEARING': 2, 'BACKLASH': 2, 'COOLING': 2}
+WARNING raw/run_01.csv joint 1: motor_temp still rising 2.2 C/min after warmup_skip_seconds=10. Increase warmup_skip_seconds or record longer, otherwise warm-up looks like a fault.
+WARNING raw/run_01.csv joint 2: motor_temp still rising 2.1 C/min after warmup_skip_seconds=10. Increase warmup_skip_seconds or record longer, otherwise warm-up looks like a fault.
+WARNING raw/run_02.csv joint 1: motor_temp still rising 2.2 C/min after warmup_skip_seconds=10. Increase warmup_skip_seconds or record longer, otherwise warm-up looks like a fault.
+WARNING raw/run_02.csv joint 2: motor_temp still rising 2.1 C/min after warmup_skip_seconds=10. Increase warmup_skip_seconds or record longer, otherwise warm-up looks like a fault.
+WARNING raw/run_03.csv joint 1: motor_temp still rising 2.2 C/min after warmup_skip_seconds=10. Increase warmup_skip_seconds or record longer, otherwise warm-up looks like a fault.
+WARNING raw/run_03.csv joint 2: motor_temp still rising 2.1 C/min after warmup_skip_seconds=10. Increase warmup_skip_seconds or record longer, otherwise warm-up looks like a fault.
+WARNING raw/run_04.csv joint 1: motor_temp still rising 2.2 C/min after warmup_skip_seconds=10. Increase warmup_skip_seconds or record longer, otherwise warm-up looks like a fault.
+WARNING raw/run_04.csv joint 2: motor_temp still rising 2.1 C/min after warmup_skip_seconds=10. Increase warmup_skip_seconds or record longer, otherwise warm-up looks like a fault.
+WARNING raw/run_05.csv joint 1: motor_temp still rising 2.2 C/min after warmup_skip_seconds=10. Increase warmup_skip_seconds or record longer, otherwise warm-up looks like a fault.
+WARNING raw/run_05.csv joint 2: motor_temp still rising 4.2 C/min after warmup_skip_seconds=10. Increase warmup_skip_seconds or record longer, otherwise warm-up looks like a fault.
+WARNING raw/run_06.csv joint 1: motor_temp still rising 2.2 C/min after warmup_skip_seconds=10. Increase warmup_skip_seconds or record longer, otherwise warm-up looks like a fault.
+WARNING raw/run_06.csv joint 2: motor_temp still rising 4.2 C/min after warmup_skip_seconds=10. Increase warmup_skip_seconds or record longer, otherwise warm-up looks like a fault.
+WARNING raw/run_07.csv joint 1: motor_temp still rising 2.2 C/min after warmup_skip_seconds=10. Increase warmup_skip_seconds or record longer, otherwise warm-up looks like a fault.
+WARNING raw/run_07.csv joint 2: motor_temp still rising 2.1 C/min after warmup_skip_seconds=10. Increase warmup_skip_seconds or record longer, otherwise warm-up looks like a fault.
+WARNING raw/run_08.csv joint 1: motor_temp still rising 2.2 C/min after warmup_skip_seconds=10. Increase warmup_skip_seconds or record longer, otherwise warm-up looks like a fault.
+WARNING raw/run_08.csv joint 2: motor_temp still rising 2.1 C/min after warmup_skip_seconds=10. Increase warmup_skip_seconds or record longer, otherwise warm-up looks like a fault.
+WARNING raw/run_09.csv joint 1: motor_temp still rising 2.2 C/min after warmup_skip_seconds=10. Increase warmup_skip_seconds or record longer, otherwise warm-up looks like a fault.
+WARNING raw/run_09.csv joint 2: motor_temp still rising 2.1 C/min after warmup_skip_seconds=10. Increase warmup_skip_seconds or record longer, otherwise warm-up looks like a fault.
+WARNING raw/run_10.csv joint 1: motor_temp still rising 2.2 C/min after warmup_skip_seconds=10. Increase warmup_skip_seconds or record longer, otherwise warm-up looks like a fault.
+WARNING raw/run_10.csv joint 2: motor_temp still rising 2.1 C/min after warmup_skip_seconds=10. Increase warmup_skip_seconds or record longer, otherwise warm-up looks like a fault.
+WARNING raw/run_11.csv joint 1: motor_temp still rising 2.2 C/min after warmup_skip_seconds=10. Increase warmup_skip_seconds or record longer, otherwise warm-up looks like a fault.
+WARNING raw/run_11.csv joint 2: motor_temp still rising 6.0 C/min after warmup_skip_seconds=10. Increase warmup_skip_seconds or record longer, otherwise warm-up looks like a fault.
+WARNING raw/run_12.csv joint 1: motor_temp still rising 2.2 C/min after warmup_skip_seconds=10. Increase warmup_skip_seconds or record longer, otherwise warm-up looks like a fault.
+WARNING raw/run_12.csv joint 2: motor_temp still rising 6.0 C/min after warmup_skip_seconds=10. Increase warmup_skip_seconds or record longer, otherwise warm-up looks like a fault.
+Result: OK
+Extracting features...
+  912 windows x 97 features from 12 runs (0 windows skipped for missing values)
+
+ANOMALY DETECTION
+  setup load_5kg | joint 1: trained on 304 windows; tested on held out runs run_03, run_04, run_09, run_12
+    false alarm rate on unseen normal data: 2.0%
+  setup load_5kg | joint 2: trained on 114 windows; tested on held out runs run_01
+    false alarm rate on unseen normal data: 0.0%
+    BACKLASH                 detected  22.4%  ROC AUC 0.886  top: tracking_error_std z=103.9, tracking_error_rms z=103.9, tracking_error_min z=84.4
+    BEARING                  detected  52.6%  ROC AUC 0.963  top: accel_kurtosis z=136.9, accel_p2p z=71.7, accel_min z=51.6
+    COOLING                  detected  75.0%  ROC AUC 0.484  top: motor_temp_rise_per_watt z=5.4, motor_temp_rise_over_ambient z=5.3, motor_temp_rise_since_start z=4.6
+    FRICTION                 detected  98.7%  ROC AUC 1.000  top: power_mean z=63.1, power_skewness z=55.7, torque_min z=33.5
+
+FAULT CLASSIFICATION
+  test runs run_03, run_04, run_09, run_12: accuracy 0.875, macro F1 0.641
+  top features: torque_kurtosis 0.038, power_kurtosis 0.036, current_kurtosis 0.032, current_p2p 0.031, accel_max 0.030
+
+Saved <temp>/partner.joblib

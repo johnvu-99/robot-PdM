@@ -1,0 +1,229 @@
+
+=== LINEAR_REGRESSION
+Training LINEAR_REGRESSION, protocol PHM_LEARNING_TO_FULL_TEST
+  [1/6] PHM2012: features for PHM_Bearing1_1 (2803 snapshots)
+  [2/6] PHM2012: features for PHM_Bearing1_2 (871 snapshots)
+  [3/6] PHM2012: features for PHM_Bearing2_1 (911 snapshots)
+  [4/6] PHM2012: features for PHM_Bearing2_2 (797 snapshots)
+  [5/6] PHM2012: features for PHM_Bearing3_1 (515 snapshots)
+  [6/6] PHM2012: features for PHM_Bearing3_2 (1637 snapshots)
+  [1/11] PHM2012: features for PHM_Bearing1_3 (2375 snapshots)
+  [2/11] PHM2012: features for PHM_Bearing1_4 (1428 snapshots)
+  [3/11] PHM2012: features for PHM_Bearing1_5 (2463 snapshots)
+  [4/11] PHM2012: features for PHM_Bearing1_6 (2448 snapshots)
+  [5/11] PHM2012: features for PHM_Bearing1_7 (2259 snapshots)
+  [6/11] PHM2012: features for PHM_Bearing2_3 (1955 snapshots)
+  [7/11] PHM2012: features for PHM_Bearing2_4 (751 snapshots)
+  [8/11] PHM2012: features for PHM_Bearing2_5 (2311 snapshots)
+  [9/11] PHM2012: features for PHM_Bearing2_6 (701 snapshots)
+  [10/11] PHM2012: features for PHM_Bearing2_7 (230 snapshots)
+  [11/11] PHM2012: features for PHM_Bearing3_3 (434 snapshots)
+  Leave one run out cross validation (6 folds)
+  Fitting LINEAR_REGRESSION on 6 training runs
+Training bearings  : PHM_Bearing1_1, PHM_Bearing1_2, PHM_Bearing2_1, PHM_Bearing2_2, PHM_Bearing3_1, PHM_Bearing3_2
+Validation bearings: PHM_Bearing1_3, PHM_Bearing1_4, PHM_Bearing1_5, PHM_Bearing1_6, PHM_Bearing1_7, PHM_Bearing2_3, PHM_Bearing2_4, PHM_Bearing2_5, PHM_Bearing2_6, PHM_Bearing2_7, PHM_Bearing3_3  (never used for training)
+
+Leave one bearing out cross validation (training set)
+  bearing            condition          life h     MAE    RMSE     R2   rank  late err %
+  PHM_Bearing1_1     1800rpm_4000N        7.78   0.185   0.213   0.46   0.77       122.3
+  PHM_Bearing1_2     1800rpm_4000N        2.42   0.346   0.422  -1.13   0.73        25.0
+  PHM_Bearing2_1     1650rpm_4200N        2.53   0.154   0.184   0.59   0.86        32.1
+  PHM_Bearing2_2     1650rpm_4200N        2.21   0.152   0.180   0.61   0.93        22.1
+  PHM_Bearing3_1     1500rpm_5000N        1.43   0.296   0.358  -0.54   0.85       219.9
+  PHM_Bearing3_2     1500rpm_5000N        4.54   0.201   0.231   0.36   0.53        40.0
+  cross validation: MAE 0.222  RMSE 0.265  R2 0.06  rank 0.78  (MAE = 22.2% of life, 6 bearings)
+
+Saved models/rul_linear_regression_phm_learning_to_full_test_20260928_234144.joblib
+Next: python -m tools.rul evaluate --model-file models/rul_linear_regression_phm_learning_to_full_test_20260928_234144.joblib --protocol PHM_LEARNING_TO_FULL_TEST
+  [1/6] PHM2012: features for PHM_Bearing1_1 (2803 snapshots)
+  [2/6] PHM2012: features for PHM_Bearing1_2 (871 snapshots)
+  [3/6] PHM2012: features for PHM_Bearing2_1 (911 snapshots)
+  [4/6] PHM2012: features for PHM_Bearing2_2 (797 snapshots)
+  [5/6] PHM2012: features for PHM_Bearing3_1 (515 snapshots)
+  [6/6] PHM2012: features for PHM_Bearing3_2 (1637 snapshots)
+  [1/11] PHM2012: features for PHM_Bearing1_3 (2375 snapshots)
+  [2/11] PHM2012: features for PHM_Bearing1_4 (1428 snapshots)
+  [3/11] PHM2012: features for PHM_Bearing1_5 (2463 snapshots)
+  [4/11] PHM2012: features for PHM_Bearing1_6 (2448 snapshots)
+  [5/11] PHM2012: features for PHM_Bearing1_7 (2259 snapshots)
+  [6/11] PHM2012: features for PHM_Bearing2_3 (1955 snapshots)
+  [7/11] PHM2012: features for PHM_Bearing2_4 (751 snapshots)
+  [8/11] PHM2012: features for PHM_Bearing2_5 (2311 snapshots)
+  [9/11] PHM2012: features for PHM_Bearing2_6 (701 snapshots)
+  [10/11] PHM2012: features for PHM_Bearing2_7 (230 snapshots)
+  [11/11] PHM2012: features for PHM_Bearing3_3 (434 snapshots)
+Model LINEAR_REGRESSION trained on PHM2012 (PHM_LEARNING_TO_FULL_TEST)
+
+Validation on unseen bearings
+  bearing            condition          life h     MAE    RMSE     R2   rank  late err %
+  PHM_Bearing1_3     1800rpm_4000N        6.59   0.257   0.378  -0.71   0.25      1562.9
+  PHM_Bearing1_4     1800rpm_4000N        3.96   0.180   0.233   0.35   0.95        83.0
+  PHM_Bearing1_5     1800rpm_4000N        6.84   0.222   0.306  -0.12   0.78       159.5
+  PHM_Bearing1_6     1800rpm_4000N        6.80   0.251   0.352  -0.49   0.51       297.5
+  PHM_Bearing1_7     1800rpm_4000N        6.27   0.255   0.331  -0.31   0.85       152.6
+  PHM_Bearing2_3     1650rpm_4200N        5.43   0.491   0.572  -2.92  -0.19      7300.3
+  PHM_Bearing2_4     1650rpm_4200N        2.08   0.159   0.181   0.61   0.95        33.4
+  PHM_Bearing2_5     1650rpm_4200N        6.42   0.279   0.333  -0.33   0.29        32.1
+  PHM_Bearing2_6     1650rpm_4200N        1.94   0.309   0.368  -0.62   0.88       195.4
+  PHM_Bearing2_7     1650rpm_4200N        0.64   0.415   0.468  -1.61   0.87       903.3
+  PHM_Bearing3_3     1500rpm_5000N        1.20   0.231   0.284   0.04   0.95        97.9
+  validation: MAE 0.277  RMSE 0.346  R2 -0.56  rank 0.64  (MAE = 27.7% of life, 11 bearings)
+
+  rank = Spearman correlation between true and predicted RUL: is the order right?
+  late err % = error of the predicted remaining TIME, from 50% of life onwards,
+  as a percent of total life (early in life the time estimate is unstable).
+
+=== RANDOM_FOREST
+Training RANDOM_FOREST, protocol PHM_LEARNING_TO_FULL_TEST
+  [1/6] PHM2012: features for PHM_Bearing1_1 (2803 snapshots)
+  [2/6] PHM2012: features for PHM_Bearing1_2 (871 snapshots)
+  [3/6] PHM2012: features for PHM_Bearing2_1 (911 snapshots)
+  [4/6] PHM2012: features for PHM_Bearing2_2 (797 snapshots)
+  [5/6] PHM2012: features for PHM_Bearing3_1 (515 snapshots)
+  [6/6] PHM2012: features for PHM_Bearing3_2 (1637 snapshots)
+  [1/11] PHM2012: features for PHM_Bearing1_3 (2375 snapshots)
+  [2/11] PHM2012: features for PHM_Bearing1_4 (1428 snapshots)
+  [3/11] PHM2012: features for PHM_Bearing1_5 (2463 snapshots)
+  [4/11] PHM2012: features for PHM_Bearing1_6 (2448 snapshots)
+  [5/11] PHM2012: features for PHM_Bearing1_7 (2259 snapshots)
+  [6/11] PHM2012: features for PHM_Bearing2_3 (1955 snapshots)
+  [7/11] PHM2012: features for PHM_Bearing2_4 (751 snapshots)
+  [8/11] PHM2012: features for PHM_Bearing2_5 (2311 snapshots)
+  [9/11] PHM2012: features for PHM_Bearing2_6 (701 snapshots)
+  [10/11] PHM2012: features for PHM_Bearing2_7 (230 snapshots)
+  [11/11] PHM2012: features for PHM_Bearing3_3 (434 snapshots)
+  Leave one run out cross validation (6 folds)
+  Fitting RANDOM_FOREST on 6 training runs
+Training bearings  : PHM_Bearing1_1, PHM_Bearing1_2, PHM_Bearing2_1, PHM_Bearing2_2, PHM_Bearing3_1, PHM_Bearing3_2
+Validation bearings: PHM_Bearing1_3, PHM_Bearing1_4, PHM_Bearing1_5, PHM_Bearing1_6, PHM_Bearing1_7, PHM_Bearing2_3, PHM_Bearing2_4, PHM_Bearing2_5, PHM_Bearing2_6, PHM_Bearing2_7, PHM_Bearing3_3  (never used for training)
+
+Leave one bearing out cross validation (training set)
+  bearing            condition          life h     MAE    RMSE     R2   rank  late err %
+  PHM_Bearing1_1     1800rpm_4000N        7.78   0.135   0.182   0.60   0.92        12.8
+  PHM_Bearing1_2     1800rpm_4000N        2.42   0.184   0.252   0.24   0.88        92.5
+  PHM_Bearing2_1     1650rpm_4200N        2.53   0.156   0.193   0.56   0.96        57.6
+  PHM_Bearing2_2     1650rpm_4200N        2.21   0.117   0.155   0.71   0.89        12.8
+  PHM_Bearing3_1     1500rpm_5000N        1.43   0.345   0.389  -0.80   0.95       388.8
+  PHM_Bearing3_2     1500rpm_5000N        4.54   0.194   0.246   0.28   0.61        60.2
+  cross validation: MAE 0.188  RMSE 0.236  R2 0.26  rank 0.87  (MAE = 18.8% of life, 6 bearings)
+
+Saved models/rul_random_forest_phm_learning_to_full_test_20260928_234248.joblib
+Next: python -m tools.rul evaluate --model-file models/rul_random_forest_phm_learning_to_full_test_20260928_234248.joblib --protocol PHM_LEARNING_TO_FULL_TEST
+  [1/6] PHM2012: features for PHM_Bearing1_1 (2803 snapshots)
+  [2/6] PHM2012: features for PHM_Bearing1_2 (871 snapshots)
+  [3/6] PHM2012: features for PHM_Bearing2_1 (911 snapshots)
+  [4/6] PHM2012: features for PHM_Bearing2_2 (797 snapshots)
+  [5/6] PHM2012: features for PHM_Bearing3_1 (515 snapshots)
+  [6/6] PHM2012: features for PHM_Bearing3_2 (1637 snapshots)
+  [1/11] PHM2012: features for PHM_Bearing1_3 (2375 snapshots)
+  [2/11] PHM2012: features for PHM_Bearing1_4 (1428 snapshots)
+  [3/11] PHM2012: features for PHM_Bearing1_5 (2463 snapshots)
+  [4/11] PHM2012: features for PHM_Bearing1_6 (2448 snapshots)
+  [5/11] PHM2012: features for PHM_Bearing1_7 (2259 snapshots)
+  [6/11] PHM2012: features for PHM_Bearing2_3 (1955 snapshots)
+  [7/11] PHM2012: features for PHM_Bearing2_4 (751 snapshots)
+  [8/11] PHM2012: features for PHM_Bearing2_5 (2311 snapshots)
+  [9/11] PHM2012: features for PHM_Bearing2_6 (701 snapshots)
+  [10/11] PHM2012: features for PHM_Bearing2_7 (230 snapshots)
+  [11/11] PHM2012: features for PHM_Bearing3_3 (434 snapshots)
+Model RANDOM_FOREST trained on PHM2012 (PHM_LEARNING_TO_FULL_TEST)
+
+Validation on unseen bearings
+  bearing            condition          life h     MAE    RMSE     R2   rank  late err %
+  PHM_Bearing1_3     1800rpm_4000N        6.59   0.151   0.181   0.61   0.97        27.3
+  PHM_Bearing1_4     1800rpm_4000N        3.96   0.237   0.305  -0.11   0.96       228.9
+  PHM_Bearing1_5     1800rpm_4000N        6.84   0.386   0.472  -1.67  -0.06       555.8
+  PHM_Bearing1_6     1800rpm_4000N        6.80   0.155   0.201   0.52   0.97        70.3
+  PHM_Bearing1_7     1800rpm_4000N        6.27   0.162   0.201   0.52   0.90        35.6
+  PHM_Bearing2_3     1650rpm_4200N        5.43   0.349   0.422  -1.13  -0.01        39.6
+  PHM_Bearing2_4     1650rpm_4200N        2.08   0.184   0.220   0.42   0.79        20.5
+  PHM_Bearing2_5     1650rpm_4200N        6.42   0.371   0.432  -1.24   0.34        20.2
+  PHM_Bearing2_6     1650rpm_4200N        1.94   0.367   0.445  -1.36   0.95       381.4
+  PHM_Bearing2_7     1650rpm_4200N        0.64   0.334   0.391  -0.82   0.88       251.2
+  PHM_Bearing3_3     1500rpm_5000N        1.20   0.376   0.431  -1.22   0.92       421.7
+  validation: MAE 0.279  RMSE 0.336  R2 -0.50  rank 0.69  (MAE = 27.9% of life, 11 bearings)
+
+  rank = Spearman correlation between true and predicted RUL: is the order right?
+  late err % = error of the predicted remaining TIME, from 50% of life onwards,
+  as a percent of total life (early in life the time estimate is unstable).
+
+=== GRADIENT_BOOSTING
+Training GRADIENT_BOOSTING, protocol PHM_LEARNING_TO_FULL_TEST
+  [1/6] PHM2012: features for PHM_Bearing1_1 (2803 snapshots)
+  [2/6] PHM2012: features for PHM_Bearing1_2 (871 snapshots)
+  [3/6] PHM2012: features for PHM_Bearing2_1 (911 snapshots)
+  [4/6] PHM2012: features for PHM_Bearing2_2 (797 snapshots)
+  [5/6] PHM2012: features for PHM_Bearing3_1 (515 snapshots)
+  [6/6] PHM2012: features for PHM_Bearing3_2 (1637 snapshots)
+  [1/11] PHM2012: features for PHM_Bearing1_3 (2375 snapshots)
+  [2/11] PHM2012: features for PHM_Bearing1_4 (1428 snapshots)
+  [3/11] PHM2012: features for PHM_Bearing1_5 (2463 snapshots)
+  [4/11] PHM2012: features for PHM_Bearing1_6 (2448 snapshots)
+  [5/11] PHM2012: features for PHM_Bearing1_7 (2259 snapshots)
+  [6/11] PHM2012: features for PHM_Bearing2_3 (1955 snapshots)
+  [7/11] PHM2012: features for PHM_Bearing2_4 (751 snapshots)
+  [8/11] PHM2012: features for PHM_Bearing2_5 (2311 snapshots)
+  [9/11] PHM2012: features for PHM_Bearing2_6 (701 snapshots)
+  [10/11] PHM2012: features for PHM_Bearing2_7 (230 snapshots)
+  [11/11] PHM2012: features for PHM_Bearing3_3 (434 snapshots)
+  Leave one run out cross validation (6 folds)
+  Fitting GRADIENT_BOOSTING on 6 training runs
+Training bearings  : PHM_Bearing1_1, PHM_Bearing1_2, PHM_Bearing2_1, PHM_Bearing2_2, PHM_Bearing3_1, PHM_Bearing3_2
+Validation bearings: PHM_Bearing1_3, PHM_Bearing1_4, PHM_Bearing1_5, PHM_Bearing1_6, PHM_Bearing1_7, PHM_Bearing2_3, PHM_Bearing2_4, PHM_Bearing2_5, PHM_Bearing2_6, PHM_Bearing2_7, PHM_Bearing3_3  (never used for training)
+
+Leave one bearing out cross validation (training set)
+  bearing            condition          life h     MAE    RMSE     R2   rank  late err %
+  PHM_Bearing1_1     1800rpm_4000N        7.78   0.101   0.145   0.75   0.90         6.2
+  PHM_Bearing1_2     1800rpm_4000N        2.42   0.145   0.182   0.60   0.72        28.6
+  PHM_Bearing2_1     1650rpm_4200N        2.53   0.104   0.132   0.79   0.97        31.9
+  PHM_Bearing2_2     1650rpm_4200N        2.21   0.105   0.122   0.82   0.98        11.0
+  PHM_Bearing3_1     1500rpm_5000N        1.43   0.322   0.381  -0.73   0.96       235.4
+  PHM_Bearing3_2     1500rpm_5000N        4.54   0.208   0.247   0.27   0.70        15.6
+  cross validation: MAE 0.164  RMSE 0.201  R2 0.42  rank 0.87  (MAE = 16.4% of life, 6 bearings)
+
+Saved models/rul_gradient_boosting_phm_learning_to_full_test_20260928_234339.joblib
+Next: python -m tools.rul evaluate --model-file models/rul_gradient_boosting_phm_learning_to_full_test_20260928_234339.joblib --protocol PHM_LEARNING_TO_FULL_TEST
+  [1/6] PHM2012: features for PHM_Bearing1_1 (2803 snapshots)
+  [2/6] PHM2012: features for PHM_Bearing1_2 (871 snapshots)
+  [3/6] PHM2012: features for PHM_Bearing2_1 (911 snapshots)
+  [4/6] PHM2012: features for PHM_Bearing2_2 (797 snapshots)
+  [5/6] PHM2012: features for PHM_Bearing3_1 (515 snapshots)
+  [6/6] PHM2012: features for PHM_Bearing3_2 (1637 snapshots)
+  [1/11] PHM2012: features for PHM_Bearing1_3 (2375 snapshots)
+  [2/11] PHM2012: features for PHM_Bearing1_4 (1428 snapshots)
+  [3/11] PHM2012: features for PHM_Bearing1_5 (2463 snapshots)
+  [4/11] PHM2012: features for PHM_Bearing1_6 (2448 snapshots)
+  [5/11] PHM2012: features for PHM_Bearing1_7 (2259 snapshots)
+  [6/11] PHM2012: features for PHM_Bearing2_3 (1955 snapshots)
+  [7/11] PHM2012: features for PHM_Bearing2_4 (751 snapshots)
+  [8/11] PHM2012: features for PHM_Bearing2_5 (2311 snapshots)
+  [9/11] PHM2012: features for PHM_Bearing2_6 (701 snapshots)
+  [10/11] PHM2012: features for PHM_Bearing2_7 (230 snapshots)
+  [11/11] PHM2012: features for PHM_Bearing3_3 (434 snapshots)
+Model GRADIENT_BOOSTING trained on PHM2012 (PHM_LEARNING_TO_FULL_TEST)
+
+Validation on unseen bearings
+  bearing            condition          life h     MAE    RMSE     R2   rank  late err %
+  PHM_Bearing1_3     1800rpm_4000N        6.59   0.164   0.191   0.56   0.97        33.0
+  PHM_Bearing1_4     1800rpm_4000N        3.96   0.223   0.278   0.07   0.98       137.1
+  PHM_Bearing1_5     1800rpm_4000N        6.84   0.387   0.461  -1.55   0.93       456.8
+  PHM_Bearing1_6     1800rpm_4000N        6.80   0.132   0.175   0.63   0.91        52.8
+  PHM_Bearing1_7     1800rpm_4000N        6.27   0.148   0.186   0.59   0.96        34.6
+  PHM_Bearing2_3     1650rpm_4200N        5.43   0.315   0.383  -0.76   0.07        26.2
+  PHM_Bearing2_4     1650rpm_4200N        2.08   0.130   0.153   0.72   0.96        14.8
+  PHM_Bearing2_5     1650rpm_4200N        6.42   0.393   0.449  -1.42   0.47        22.1
+  PHM_Bearing2_6     1650rpm_4200N        1.94   0.382   0.455  -1.48   0.93       417.5
+  PHM_Bearing2_7     1650rpm_4200N        0.64   0.333   0.373  -0.65   0.98       252.4
+  PHM_Bearing3_3     1500rpm_5000N        1.20   0.364   0.418  -1.09   0.83       353.2
+  validation: MAE 0.270  RMSE 0.320  R2 -0.40  rank 0.82  (MAE = 27.0% of life, 11 bearings)
+
+  rank = Spearman correlation between true and predicted RUL: is the order right?
+  late err % = error of the predicted remaining TIME, from 50% of life onwards,
+  as a percent of total life (early in life the time estimate is unstable).
+
+SUMMARY (PHM_LEARNING_TO_FULL_TEST)
+  model                  cross val MAE / R2     validation MAE / RMSE / R2
+  LINEAR_REGRESSION       0.222 / 0.06            0.277 / 0.346  / -0.56 
+  RANDOM_FOREST           0.188 / 0.26            0.279 / 0.336  / -0.50 
+  GRADIENT_BOOSTING       0.164 / 0.42            0.270 / 0.320  / -0.40 
+  lowest validation MAE: GRADIENT_BOOSTING

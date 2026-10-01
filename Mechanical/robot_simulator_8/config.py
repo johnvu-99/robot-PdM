@@ -478,9 +478,65 @@ RUL_TIME_AWARE_SMOOTHING = True
 RUL_EMA_FAST_TAU_S = 168.0     # -60 / ln(0.70)
 RUL_EMA_SLOW_TAU_S = 1170.0    # -60 / ln(0.95)
 RUL_BASELINE_SECONDS = 600.0   # healthy reference: the first 10 minutes
+# Reference for the loudness features (RMS, peak to peak, spectral energy).
+#   "START":    the first RUL_BASELINE_SECONDS (a new bearing).
+#   "QUIETEST": the quietest the bearing has been so far (running minimum of a
+#               RUL_QUIETEST_TAU_S EMA; causal). A bearing that starts rough
+#               (run-in) and settles no longer looks healthier than new.
+#   "BOTH":     keep the START features and add the QUIETEST ones.
+RUL_LOUDNESS_REFERENCE = "START"
+RUL_QUIETEST_TAU_S = 300.0
+# Per protocol: QUIETEST helps a model move to a new machine (XJTU -> PHM MAE
+# 0.203 -> 0.196, rank 0.66 -> 0.81) but hurts PHM -> PHM (MAE 0.198 -> 0.279),
+# where "quieter than at the start" works as a clock because every PHM bearing
+# shares the same run-in. The trained model file stores the reference it used.
+RUL_LOUDNESS_REFERENCE_BY_PROTOCOL = {
+    "XJTU_TO_PHM": "QUIETEST",
+    "PHM_LEARNING_TO_FULL_TEST": "START",
+    "XJTU_PLUS_PHM_TO_FULL_TEST": "START",
+}
+# Fix 2 options (see CODE_GUIDE_MECHANICAL.md, "Improving XJTU -> PHM"):
+#   RUL_DROP_LOUDNESS_FEATURES: leave out RMS, peak to peak and spectral energy,
+#     keeping only signal SHAPE (kurtosis, crest factor, spectral centroid, bands).
+#   RUL_TREND_FEATURES: add fast EMA minus slow EMA (is it rising right now?).
+RUL_DROP_LOUDNESS_FEATURES = False
+RUL_TREND_FEATURES = False
+# Experiment option (off): kurtosis only counts once RMS has grown. The kurtosis
+# change is scaled by clip(RMS growth / this value, 0, 1), so spikes without any
+# rise in loudness are ignored. 0 disables it.
+RUL_KURTOSIS_NEEDS_GROWTH = 0.0
+# Fix 4, "gate": do not predict degradation before degradation is detected.
+# First predicting time (FPT) = first moment the fast EMA of RMS growth or
+# kurtosis stays above this bearing's normal range (its first
+# RUL_FPT_HEALTHY_S seconds: mean + RUL_FPT_K std) for RUL_FPT_SUSTAIN_S
+# seconds. Causal. Before the FPT the prediction is floored at the median RUL
+# the TRAINING bearings had at their FPT (stored in the model file).
+# XJTU -> PHM with Fix 1 + gate: MAE 0.196 -> 0.181, R2 0.31 -> 0.39. Neutral
+# on PHM -> PHM (MAE 0.198 -> 0.199), so off there.
+RUL_FPT_GATE_BY_PROTOCOL = {
+    "XJTU_TO_PHM": True,
+    "PHM_LEARNING_TO_FULL_TEST": False,
+    "XJTU_PLUS_PHM_TO_FULL_TEST": False,
+}
+RUL_FPT_K = 5.0
+RUL_FPT_SUSTAIN_S = 120.0
+RUL_FPT_HEALTHY_S = 600.0
 # Health indicator: HI = exp(-k * degradation), degradation = running max of
 # the slow EMA of log(RMS / baseline RMS). Only used for display.
 HEALTH_INDICATOR_SENSITIVITY = 1.0
+# Post-processing of the predicted RUL curve, causal (past snapshots only).
+# A model applied to a DIFFERENT dataset than it was trained on (XJTU-SY ->
+# PHM 2012) gives noisy per snapshot predictions; a time based EMA over them
+# helps: XJTU -> PHM MAE 0.216 -> 0.203, R2 0.15 -> 0.27, rank 0.53 -> 0.66.
+# On the same dataset (PHM -> PHM) the model is already on the right time
+# scale and smoothing only adds lag (MAE 0.198 -> 0.216), so it is not applied.
+# Chosen on PHM Learning_set, confirmed on Full_Test_Set (results/experiments/).
+# 0 disables it.
+RUL_CROSS_DATASET_SMOOTHING_TAU_S = 900.0
+# Never let predicted RUL rise again (damage does not heal). Off: it makes the
+# rank metric almost automatic (0.94 - 1.00 for every model) without improving
+# MAE or R2, and locks in early false drops.
+RUL_MONOTONE_PREDICTION = False
 
 RUL_MODELS = ("LINEAR_REGRESSION", "RANDOM_FOREST", "GRADIENT_BOOSTING")
 RUL_DEFAULT_MODEL = "RANDOM_FOREST"
@@ -488,6 +544,7 @@ RUL_RANDOM_STATE = 11
 RUL_PROTOCOLS = {
     "XJTU_TO_PHM": "Train XJTU-SY (leave one bearing out CV), validate PHM2012",
     "PHM_LEARNING_TO_FULL_TEST": "Train PHM Learning_set, validate PHM Full_Test_Set",
+    "XJTU_PLUS_PHM_TO_FULL_TEST": "Train XJTU-SY + PHM Learning_set, validate PHM Full_Test_Set",
 }
 RUL_DEFAULT_PROTOCOL = "XJTU_TO_PHM"
 

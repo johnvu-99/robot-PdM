@@ -1,0 +1,16 @@
+<env>/lib/python3.10/site-packages/scipy/stats/_stats_py.py:4881: ConstantInputWarning: An input array is constant; the correlation coefficient is not defined.
+  warnings.warn(stats.ConstantInputWarning(warn_msg))
+variant            | dev (6) MAE R2 rank        | test (11) MAE R2 rank      | all (17) MAE R2 rank      
+quiet300           | 0.212  0.24  0.76          | 0.187  0.35  0.84          | 0.196  0.31  0.81         
+   f4_k3: training FPT at RUL 0.89 (median), before-FPT output 0.89
+f4_k3              | 0.221  0.02  0.81          | 0.181  0.37  0.84          | 0.195  0.25  0.83         
+   PHM degradation detected at life 0.14 1.00 0.13 0.22 0.17 0.06 0.07 0.10 0.04 0.04 0.15 0.03 0.35 0.03 0.11 0.47 0.17 (1.00 = never)
+   f4_k5: training FPT at RUL 0.72 (median), before-FPT output 0.72
+f4_k5              | 0.213  0.26  0.76          | 0.184  0.38  0.80          | 0.194  0.34  0.78         
+   PHM degradation detected at life 0.14 0.08 0.13 0.23 0.23 0.07 0.41 0.11 0.05 0.21 0.38 0.05 0.35 0.03 0.11 0.51 0.18 (1.00 = never)
+   f4_k8: training FPT at RUL 0.62 (median), before-FPT output 0.62
+f4_k8              | 0.217  0.23  0.84          | 0.193  0.35  0.80          | 0.201  0.31  0.82         
+   PHM degradation detected at life 0.14 0.08 0.13 0.23 0.28 0.07 0.43 0.38 0.06 0.65 0.38 0.13 0.36 0.03 0.63 0.51 0.19 (1.00 = never)
+   f4_k5_gate_only: training FPT at RUL 0.72 (median), before-FPT output 0.72
+f4_k5_gate_only    | 0.197  0.33  0.78          | 0.172  0.42  0.85          | 0.181  0.39  0.82         
+   PHM degradation detected at life 0.14 0.08 0.13 0.23 0.23 0.07 0.41 0.11 0.05 0.21 0.38 0.05 0.35 0.03 0.11 0.51 0.18 (1.00 = never)

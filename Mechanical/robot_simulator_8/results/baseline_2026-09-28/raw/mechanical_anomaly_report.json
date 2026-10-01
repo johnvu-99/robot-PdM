@@ -1,0 +1,910 @@
+[
+  {
+    "setup": "CWRU | rolling bearing | CWRU_load0",
+    "threshold": 0.5730534639675386,
+    "healthy_test_windows": 9,
+    "false_alarm_rate": 0.0,
+    "thermal_check": false,
+    "labels": {
+      "BEARING_BALL": {
+        "windows": 54,
+        "detection_rate": 0.6481481481481481,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 0.9794238683127572,
+        "median_ratio": 1.0101907298052972,
+        "top_features": [
+          [
+            "vibration_band_energy_2",
+            15.174838468850222
+          ],
+          [
+            "vibration_energy",
+            10.431171523654003
+          ],
+          [
+            "vibration_band_energy_0",
+            10.044760042696442
+          ],
+          [
+            "vibration_spectral_energy",
+            9.817520908912725
+          ],
+          [
+            "vibration_p2p",
+            7.393226580376283
+          ]
+        ]
+      },
+      "BEARING_INNER_RACE": {
+        "windows": 54,
+        "detection_rate": 0.9629629629629629,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 0.9979423868312757,
+        "median_ratio": 1.0621307595267542,
+        "top_features": [
+          [
+            "vibration_spectral_energy",
+            161.5977859427712
+          ],
+          [
+            "vibration_energy",
+            158.24830790126794
+          ],
+          [
+            "vibration_band_energy_2",
+            96.2164068736617
+          ],
+          [
+            "vibration_p2p",
+            48.57999328754764
+          ],
+          [
+            "vibration_rms",
+            39.707042878600845
+          ]
+        ]
+      },
+      "BEARING_OUTER_RACE": {
+        "windows": 54,
+        "detection_rate": 1.0,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 1.0,
+        "median_ratio": 1.0498740621066185,
+        "top_features": [
+          [
+            "vibration_energy",
+            122.17638663680427
+          ],
+          [
+            "vibration_spectral_energy",
+            117.35522151601604
+          ],
+          [
+            "vibration_p2p",
+            50.82179003764387
+          ],
+          [
+            "vibration_rms",
+            33.32437933866543
+          ],
+          [
+            "vibration_std",
+            33.32437933866543
+          ]
+        ]
+      }
+    },
+    "healthy_recordings": [
+      "CWRU_normal_0"
+    ]
+  },
+  {
+    "setup": "CWRU | rolling bearing | CWRU_load1",
+    "threshold": 0.5225962195585803,
+    "healthy_test_windows": 18,
+    "false_alarm_rate": 0.0,
+    "thermal_check": false,
+    "labels": {
+      "BEARING_BALL": {
+        "windows": 54,
+        "detection_rate": 0.9629629629629629,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 0.9969135802469136,
+        "median_ratio": 1.2313326899883168,
+        "top_features": [
+          [
+            "vibration_band_energy_2",
+            12.760050945973955
+          ],
+          [
+            "vibration_energy",
+            10.862008264005059
+          ],
+          [
+            "vibration_spectral_energy",
+            9.731372292046686
+          ],
+          [
+            "vibration_band_energy_0",
+            5.980140581392895
+          ],
+          [
+            "vibration_rms",
+            5.435273299188112
+          ]
+        ]
+      },
+      "BEARING_INNER_RACE": {
+        "windows": 54,
+        "detection_rate": 1.0,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 1.0,
+        "median_ratio": 1.2917352295116187,
+        "top_features": [
+          [
+            "vibration_energy",
+            119.4091088117568
+          ],
+          [
+            "vibration_spectral_energy",
+            112.45233693972261
+          ],
+          [
+            "vibration_band_energy_2",
+            92.95242251186198
+          ],
+          [
+            "vibration_p2p",
+            38.27404606022193
+          ],
+          [
+            "vibration_rms",
+            35.81043812241946
+          ]
+        ]
+      },
+      "BEARING_OUTER_RACE": {
+        "windows": 54,
+        "detection_rate": 1.0,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 1.0,
+        "median_ratio": 1.249206424432481,
+        "top_features": [
+          [
+            "vibration_energy",
+            157.51968272943654
+          ],
+          [
+            "vibration_spectral_energy",
+            147.59580627894258
+          ],
+          [
+            "vibration_p2p",
+            49.43899045151214
+          ],
+          [
+            "vibration_rms",
+            43.09930956687043
+          ],
+          [
+            "vibration_std",
+            43.09930956687043
+          ]
+        ]
+      }
+    },
+    "healthy_recordings": [
+      "CWRU_normal_1"
+    ]
+  },
+  {
+    "setup": "CWRU | rolling bearing | CWRU_load2",
+    "threshold": 0.5225962195585803,
+    "healthy_test_windows": 18,
+    "false_alarm_rate": 0.0,
+    "thermal_check": false,
+    "labels": {
+      "BEARING_BALL": {
+        "windows": 54,
+        "detection_rate": 1.0,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 1.0,
+        "median_ratio": 1.245116147388467,
+        "top_features": [
+          [
+            "vibration_energy",
+            14.441787689819275
+          ],
+          [
+            "vibration_spectral_energy",
+            12.999702861898141
+          ],
+          [
+            "vibration_band_energy_1",
+            12.527413583633201
+          ],
+          [
+            "vibration_band_energy_2",
+            9.315913293457438
+          ],
+          [
+            "vibration_band_energy_0",
+            7.543312142223482
+          ]
+        ]
+      },
+      "BEARING_INNER_RACE": {
+        "windows": 54,
+        "detection_rate": 1.0,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 1.0,
+        "median_ratio": 1.2743112655419493,
+        "top_features": [
+          [
+            "vibration_energy",
+            116.10452398636747
+          ],
+          [
+            "vibration_spectral_energy",
+            108.5534722089345
+          ],
+          [
+            "vibration_band_energy_2",
+            97.49784923849805
+          ],
+          [
+            "vibration_p2p",
+            38.22842830990001
+          ],
+          [
+            "vibration_rms",
+            35.13517468373928
+          ]
+        ]
+      },
+      "BEARING_OUTER_RACE": {
+        "windows": 54,
+        "detection_rate": 1.0,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 1.0,
+        "median_ratio": 1.2673224004920902,
+        "top_features": [
+          [
+            "vibration_energy",
+            169.99266405222608
+          ],
+          [
+            "vibration_spectral_energy",
+            166.25301188758914
+          ],
+          [
+            "vibration_p2p",
+            47.4394123957346
+          ],
+          [
+            "vibration_rms",
+            45.307939626348954
+          ],
+          [
+            "vibration_std",
+            45.307939626348954
+          ]
+        ]
+      }
+    },
+    "healthy_recordings": [
+      "CWRU_normal_2"
+    ]
+  },
+  {
+    "setup": "CWRU | rolling bearing | CWRU_load3",
+    "threshold": 0.5173905176004515,
+    "healthy_test_windows": 18,
+    "false_alarm_rate": 0.2222222222222222,
+    "thermal_check": false,
+    "labels": {
+      "BEARING_BALL": {
+        "windows": 54,
+        "detection_rate": 1.0,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 0.9989711934156378,
+        "median_ratio": 1.2373278497731455,
+        "top_features": [
+          [
+            "vibration_energy",
+            31.945874203182797
+          ],
+          [
+            "vibration_spectral_energy",
+            30.03884514639475
+          ],
+          [
+            "vibration_rms",
+            15.959753871854366
+          ],
+          [
+            "vibration_std",
+            15.959753871854366
+          ],
+          [
+            "vibration_band_energy_1",
+            8.214243261221556
+          ]
+        ]
+      },
+      "BEARING_INNER_RACE": {
+        "windows": 54,
+        "detection_rate": 1.0,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 1.0,
+        "median_ratio": 1.2278115911067884,
+        "top_features": [
+          [
+            "vibration_energy",
+            72.57764332899959
+          ],
+          [
+            "vibration_spectral_energy",
+            68.5603780228237
+          ],
+          [
+            "vibration_rms",
+            29.284832374802264
+          ],
+          [
+            "vibration_std",
+            29.284832374802264
+          ],
+          [
+            "vibration_p2p",
+            20.27286234971803
+          ]
+        ]
+      },
+      "BEARING_OUTER_RACE": {
+        "windows": 54,
+        "detection_rate": 1.0,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 1.0,
+        "median_ratio": 1.1893942605825012,
+        "top_features": [
+          [
+            "vibration_spectral_energy",
+            111.07701123901973
+          ],
+          [
+            "vibration_energy",
+            109.11175742299909
+          ],
+          [
+            "vibration_dominant_frequency",
+            47.62896722005627
+          ],
+          [
+            "vibration_rms",
+            38.739158309647124
+          ],
+          [
+            "vibration_std",
+            38.739158309647124
+          ]
+        ]
+      }
+    },
+    "healthy_recordings": [
+      "CWRU_normal_3"
+    ]
+  },
+  {
+    "setup": "SEU | bearingset | SEU_20-0",
+    "threshold": 0.4435723037797252,
+    "healthy_test_windows": 72,
+    "false_alarm_rate": 0.09722222222222222,
+    "thermal_check": false,
+    "labels": {
+      "BEARING_BALL": {
+        "windows": 72,
+        "detection_rate": 1.0,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 1.0,
+        "median_ratio": 1.2562847544413671,
+        "top_features": [
+          [
+            "planetary_x_band_energy_1",
+            10.98352451666041
+          ],
+          [
+            "planetary_x_band_energy_2",
+            9.871248273896285
+          ],
+          [
+            "planetary_x_band_energy_3",
+            8.20820129251446
+          ],
+          [
+            "planetary_y_kurtosis",
+            6.649358162108932
+          ],
+          [
+            "planetary_x_spectral_centroid",
+            6.291181042573722
+          ]
+        ]
+      },
+      "BEARING_COMBINED_INNER_OUTER": {
+        "windows": 72,
+        "detection_rate": 1.0,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 1.0,
+        "median_ratio": 1.2803748332495672,
+        "top_features": [
+          [
+            "planetary_y_kurtosis",
+            8.887020867967523
+          ],
+          [
+            "planetary_z_kurtosis",
+            5.174146037198295
+          ],
+          [
+            "torque_rms",
+            4.625432737353228
+          ],
+          [
+            "torque_std",
+            4.563706653359564
+          ],
+          [
+            "planetary_x_dominant_frequency",
+            4.302096267406245
+          ]
+        ]
+      },
+      "BEARING_INNER_RACE": {
+        "windows": 72,
+        "detection_rate": 1.0,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 1.0,
+        "median_ratio": 1.2843688245435843,
+        "top_features": [
+          [
+            "torque_rms",
+            18.59042528016198
+          ],
+          [
+            "torque_std",
+            18.29077910426158
+          ],
+          [
+            "torque_peak",
+            13.675124794366312
+          ],
+          [
+            "planetary_x_band_energy_2",
+            6.972678243637382
+          ],
+          [
+            "planetary_x_band_energy_1",
+            5.873483849925533
+          ]
+        ]
+      },
+      "BEARING_OUTER_RACE": {
+        "windows": 72,
+        "detection_rate": 1.0,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 1.0,
+        "median_ratio": 1.3053575572613778,
+        "top_features": [
+          [
+            "planetary_y_kurtosis",
+            17.931729200177955
+          ],
+          [
+            "planetary_z_kurtosis",
+            8.124075012916443
+          ],
+          [
+            "planetary_x_band_energy_3",
+            7.8299559523532665
+          ],
+          [
+            "planetary_x_spectral_centroid",
+            6.84726288706152
+          ],
+          [
+            "planetary_z_band_energy_3",
+            6.269826757341038
+          ]
+        ]
+      }
+    },
+    "healthy_recordings": [
+      "SEU_bearingset_health_20_0"
+    ]
+  },
+  {
+    "setup": "SEU | bearingset | SEU_30-2",
+    "threshold": 0.47282564466783866,
+    "healthy_test_windows": 72,
+    "false_alarm_rate": 0.1111111111111111,
+    "thermal_check": false,
+    "labels": {
+      "BEARING_BALL": {
+        "windows": 72,
+        "detection_rate": 1.0,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 0.9564043209876544,
+        "median_ratio": 1.1033469297861371,
+        "top_features": [
+          [
+            "planetary_x_band_energy_1",
+            16.78585372719453
+          ],
+          [
+            "planetary_x_band_energy_2",
+            11.360906768413349
+          ],
+          [
+            "planetary_x_band_energy_3",
+            9.325078750329704
+          ],
+          [
+            "torque_std",
+            7.57259279525347
+          ],
+          [
+            "torque_rms",
+            7.571895644614054
+          ]
+        ]
+      },
+      "BEARING_COMBINED_INNER_OUTER": {
+        "windows": 72,
+        "detection_rate": 1.0,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 0.9978780864197532,
+        "median_ratio": 1.1936694708472562,
+        "top_features": [
+          [
+            "planetary_z_band_energy_0",
+            9.921946483674972
+          ],
+          [
+            "torque_std",
+            7.6013045179618866
+          ],
+          [
+            "torque_rms",
+            7.601228491912471
+          ],
+          [
+            "planetary_x_dominant_frequency",
+            6.484862207762243
+          ],
+          [
+            "planetary_z_band_energy_3",
+            5.048537846450939
+          ]
+        ]
+      },
+      "BEARING_INNER_RACE": {
+        "windows": 72,
+        "detection_rate": 1.0,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 1.0,
+        "median_ratio": 1.2889601126949062,
+        "top_features": [
+          [
+            "torque_rms",
+            17.018429815701484
+          ],
+          [
+            "torque_std",
+            17.00077563981852
+          ],
+          [
+            "planetary_z_spectral_energy",
+            12.68245031821391
+          ],
+          [
+            "planetary_z_energy",
+            12.570604150433446
+          ],
+          [
+            "planetary_z_rms",
+            11.876770570082329
+          ]
+        ]
+      },
+      "BEARING_OUTER_RACE": {
+        "windows": 72,
+        "detection_rate": 1.0,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 0.9872685185185185,
+        "median_ratio": 1.1630327279625674,
+        "top_features": [
+          [
+            "planetary_x_band_energy_1",
+            9.77465154776652
+          ],
+          [
+            "planetary_x_band_energy_2",
+            6.572142959895871
+          ],
+          [
+            "planetary_z_band_energy_1",
+            5.258181424749962
+          ],
+          [
+            "planetary_x_dominant_frequency",
+            5.011029887816278
+          ],
+          [
+            "planetary_x_band_energy_3",
+            5.008477977764867
+          ]
+        ]
+      }
+    },
+    "healthy_recordings": [
+      "SEU_bearingset_health_30_2"
+    ]
+  },
+  {
+    "setup": "SEU | gearset | SEU_20-0",
+    "threshold": 0.5160533709749381,
+    "healthy_test_windows": 72,
+    "false_alarm_rate": 0.027777777777777776,
+    "thermal_check": false,
+    "labels": {
+      "GEAR_CHIPPED_TOOTH": {
+        "windows": 72,
+        "detection_rate": 1.0,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 1.0,
+        "median_ratio": 1.2882555586212368,
+        "top_features": [
+          [
+            "motor_vibration_band_energy_3",
+            20.05378903216223
+          ],
+          [
+            "planetary_y_dominant_frequency",
+            19.815242494043275
+          ],
+          [
+            "motor_vibration_energy",
+            18.12012209600477
+          ],
+          [
+            "motor_vibration_rms",
+            14.463001402087471
+          ],
+          [
+            "motor_vibration_std",
+            14.463001402087471
+          ]
+        ]
+      },
+      "GEAR_MISSING_TOOTH": {
+        "windows": 72,
+        "detection_rate": 1.0,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 1.0,
+        "median_ratio": 1.2708603186427299,
+        "top_features": [
+          [
+            "motor_vibration_band_energy_3",
+            23.822905393116713
+          ],
+          [
+            "motor_vibration_energy",
+            16.996721255984006
+          ],
+          [
+            "motor_vibration_std",
+            12.681794319004716
+          ],
+          [
+            "motor_vibration_rms",
+            12.681794319004716
+          ],
+          [
+            "motor_vibration_spectral_energy",
+            12.346982751986761
+          ]
+        ]
+      },
+      "GEAR_ROOT_CRACK": {
+        "windows": 72,
+        "detection_rate": 1.0,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 1.0,
+        "median_ratio": 1.2347711148053095,
+        "top_features": [
+          [
+            "motor_vibration_band_energy_3",
+            16.66267970424977
+          ],
+          [
+            "motor_vibration_energy",
+            15.480942224527123
+          ],
+          [
+            "motor_vibration_spectral_energy",
+            11.236619705723694
+          ],
+          [
+            "motor_vibration_std",
+            10.810184785419555
+          ],
+          [
+            "motor_vibration_rms",
+            10.810184785419555
+          ]
+        ]
+      },
+      "GEAR_SURFACE_WEAR": {
+        "windows": 72,
+        "detection_rate": 1.0,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 1.0,
+        "median_ratio": 1.276780790417416,
+        "top_features": [
+          [
+            "planetary_x_dominant_frequency",
+            66.0821648692321
+          ],
+          [
+            "motor_vibration_band_energy_3",
+            32.92658570236458
+          ],
+          [
+            "motor_vibration_energy",
+            17.50354916826859
+          ],
+          [
+            "motor_vibration_rms",
+            13.425376423262822
+          ],
+          [
+            "motor_vibration_std",
+            13.425376423262822
+          ]
+        ]
+      }
+    },
+    "healthy_recordings": [
+      "SEU_gearset_Health_20_0"
+    ]
+  },
+  {
+    "setup": "SEU | gearset | SEU_30-2",
+    "threshold": 0.4926104120456829,
+    "healthy_test_windows": 72,
+    "false_alarm_rate": 0.09722222222222222,
+    "thermal_check": false,
+    "labels": {
+      "GEAR_CHIPPED_TOOTH": {
+        "windows": 72,
+        "detection_rate": 1.0,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 1.0,
+        "median_ratio": 1.2780364447732029,
+        "top_features": [
+          [
+            "motor_vibration_energy",
+            10.702757343381961
+          ],
+          [
+            "motor_vibration_spectral_energy",
+            10.450946674522864
+          ],
+          [
+            "motor_vibration_rms",
+            9.071164365817472
+          ],
+          [
+            "motor_vibration_std",
+            9.071164365817472
+          ],
+          [
+            "motor_vibration_p2p",
+            7.940181633454991
+          ]
+        ]
+      },
+      "GEAR_MISSING_TOOTH": {
+        "windows": 72,
+        "detection_rate": 1.0,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 1.0,
+        "median_ratio": 1.2934108489838274,
+        "top_features": [
+          [
+            "motor_vibration_band_energy_3",
+            23.75527230666099
+          ],
+          [
+            "motor_vibration_spectral_centroid",
+            15.621854316390673
+          ],
+          [
+            "motor_vibration_energy",
+            12.644711409113473
+          ],
+          [
+            "motor_vibration_spectral_energy",
+            12.196798193849078
+          ],
+          [
+            "motor_vibration_rms",
+            11.721488870398172
+          ]
+        ]
+      },
+      "GEAR_ROOT_CRACK": {
+        "windows": 72,
+        "detection_rate": 1.0,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 1.0,
+        "median_ratio": 1.2679963408553032,
+        "top_features": [
+          [
+            "motor_vibration_energy",
+            8.163354109362796
+          ],
+          [
+            "motor_vibration_spectral_energy",
+            8.088421069602152
+          ],
+          [
+            "planetary_x_dominant_frequency",
+            6.516946235179385
+          ],
+          [
+            "motor_vibration_rms",
+            6.361546688465294
+          ],
+          [
+            "motor_vibration_std",
+            6.3615466884652925
+          ]
+        ]
+      },
+      "GEAR_SURFACE_WEAR": {
+        "windows": 72,
+        "detection_rate": 1.0,
+        "thermal_alarm_rate": 0.0,
+        "roc_auc": 1.0,
+        "median_ratio": 1.2698644578583909,
+        "top_features": [
+          [
+            "motor_vibration_band_energy_3",
+            17.76478944980247
+          ],
+          [
+            "motor_vibration_energy",
+            12.113792144517056
+          ],
+          [
+            "motor_vibration_spectral_energy",
+            11.694720955447112
+          ],
+          [
+            "motor_vibration_rms",
+            10.919732954122946
+          ],
+          [
+            "motor_vibration_std",
+            10.919732954122946
+          ]
+        ]
+      }
+    },
+    "healthy_recordings": [
+      "SEU_gearset_Health_30_2"
+    ]
+  }
+]

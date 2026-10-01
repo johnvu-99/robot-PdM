@@ -1,0 +1,407 @@
+{
+ "mechanical": [
+  {
+   "source": "SEU",
+   "recordings": 20,
+   "features": 61,
+   "train_segments": 3260,
+   "test_segments": 1440,
+   "labels": [
+    "BEARING_BALL",
+    "BEARING_COMBINED_INNER_OUTER",
+    "BEARING_INNER_RACE",
+    "BEARING_OUTER_RACE",
+    "GEAR_CHIPPED_TOOTH",
+    "GEAR_MISSING_TOOTH",
+    "GEAR_ROOT_CRACK",
+    "GEAR_SURFACE_WEAR",
+    "HEALTHY"
+   ],
+   "accuracy": 0.9958333333333333,
+   "macro_f1": 0.9955615176348586,
+   "confusion": [
+    [
+     144,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     144,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     143,
+     0,
+     0,
+     0,
+     0,
+     1,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     144,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     143,
+     0,
+     0,
+     1,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     144,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     144,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     1,
+     2,
+     141,
+     0
+    ],
+    [
+     0,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     287
+    ]
+   ],
+   "top_features": [
+    [
+     "torque_std",
+     0.06915821063196262
+    ],
+    [
+     "torque_rms",
+     0.06233527844613167
+    ],
+    [
+     "motor_vibration_band_energy_3",
+     0.058026069600439475
+    ],
+    [
+     "planetary_x_band_energy_3",
+     0.055312920952727565
+    ],
+    [
+     "planetary_x_spectral_centroid",
+     0.04249461730884674
+    ],
+    [
+     "motor_vibration_band_energy_1",
+     0.03246678736206225
+    ],
+    [
+     "motor_vibration_band_energy_0",
+     0.032329858643291354
+    ],
+    [
+     "planetary_x_band_energy_1",
+     0.031070057411436827
+    ]
+   ],
+   "anomaly": [
+    {
+     "setup": "gearbox bearing | SEU_20-0",
+     "healthy_train_segments": 114,
+     "false_alarm_rate": 0.09722222222222222,
+     "labels": {
+      "BEARING_BALL": {
+       "detection_rate": 1.0,
+       "roc_auc": 1.0
+      },
+      "BEARING_COMBINED_INNER_OUTER": {
+       "detection_rate": 1.0,
+       "roc_auc": 1.0
+      },
+      "BEARING_INNER_RACE": {
+       "detection_rate": 1.0,
+       "roc_auc": 1.0
+      },
+      "BEARING_OUTER_RACE": {
+       "detection_rate": 1.0,
+       "roc_auc": 1.0
+      }
+     }
+    },
+    {
+     "setup": "gearbox bearing | SEU_30-2",
+     "healthy_train_segments": 114,
+     "false_alarm_rate": 0.1111111111111111,
+     "labels": {
+      "BEARING_BALL": {
+       "detection_rate": 1.0,
+       "roc_auc": 0.9564043209876544
+      },
+      "BEARING_COMBINED_INNER_OUTER": {
+       "detection_rate": 1.0,
+       "roc_auc": 0.9978780864197532
+      },
+      "BEARING_INNER_RACE": {
+       "detection_rate": 1.0,
+       "roc_auc": 1.0
+      },
+      "BEARING_OUTER_RACE": {
+       "detection_rate": 1.0,
+       "roc_auc": 0.9872685185185185
+      }
+     }
+    },
+    {
+     "setup": "gearbox | SEU_20-0",
+     "healthy_train_segments": 114,
+     "false_alarm_rate": 0.027777777777777776,
+     "labels": {
+      "GEAR_CHIPPED_TOOTH": {
+       "detection_rate": 1.0,
+       "roc_auc": 1.0
+      },
+      "GEAR_MISSING_TOOTH": {
+       "detection_rate": 1.0,
+       "roc_auc": 1.0
+      },
+      "GEAR_ROOT_CRACK": {
+       "detection_rate": 1.0,
+       "roc_auc": 1.0
+      },
+      "GEAR_SURFACE_WEAR": {
+       "detection_rate": 1.0,
+       "roc_auc": 1.0
+      }
+     }
+    },
+    {
+     "setup": "gearbox | SEU_30-2",
+     "healthy_train_segments": 114,
+     "false_alarm_rate": 0.09722222222222222,
+     "labels": {
+      "GEAR_CHIPPED_TOOTH": {
+       "detection_rate": 1.0,
+       "roc_auc": 1.0
+      },
+      "GEAR_MISSING_TOOTH": {
+       "detection_rate": 1.0,
+       "roc_auc": 1.0
+      },
+      "GEAR_ROOT_CRACK": {
+       "detection_rate": 1.0,
+       "roc_auc": 1.0
+      },
+      "GEAR_SURFACE_WEAR": {
+       "detection_rate": 1.0,
+       "roc_auc": 1.0
+      }
+     }
+    }
+   ]
+  },
+  {
+   "source": "CWRU",
+   "recordings": 40,
+   "features": 14,
+   "train_segments": 1420,
+   "test_segments": 711,
+   "labels": [
+    "BEARING_BALL",
+    "BEARING_INNER_RACE",
+    "BEARING_OUTER_RACE",
+    "HEALTHY"
+   ],
+   "accuracy": 0.980309423347398,
+   "macro_f1": 0.9779438904132484,
+   "confusion": [
+    [
+     207,
+     9,
+     0,
+     0
+    ],
+    [
+     1,
+     215,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     216,
+     0
+    ],
+    [
+     4,
+     0,
+     0,
+     59
+    ]
+   ],
+   "top_features": [
+    [
+     "vibration_band_energy_2",
+     0.14401203637350185
+    ],
+    [
+     "vibration_p2p",
+     0.1105267136008039
+    ],
+    [
+     "vibration_kurtosis",
+     0.09653862192316164
+    ],
+    [
+     "vibration_energy",
+     0.09382085097466727
+    ],
+    [
+     "vibration_std",
+     0.08622882571270374
+    ],
+    [
+     "vibration_band_energy_1",
+     0.07989493917162467
+    ],
+    [
+     "vibration_band_energy_3",
+     0.07646956130858897
+    ],
+    [
+     "vibration_rms",
+     0.0742838960221859
+    ]
+   ],
+   "anomaly": [
+    {
+     "setup": "rolling bearing | CWRU_load0",
+     "healthy_train_segments": 10,
+     "false_alarm_rate": 0.0,
+     "labels": {
+      "BEARING_BALL": {
+       "detection_rate": 0.7222222222222222,
+       "roc_auc": 0.9938271604938271
+      },
+      "BEARING_INNER_RACE": {
+       "detection_rate": 1.0,
+       "roc_auc": 1.0
+      },
+      "BEARING_OUTER_RACE": {
+       "detection_rate": 1.0,
+       "roc_auc": 1.0
+      }
+     }
+    },
+    {
+     "setup": "rolling bearing | CWRU_load1",
+     "healthy_train_segments": 25,
+     "false_alarm_rate": 0.0,
+     "labels": {
+      "BEARING_BALL": {
+       "detection_rate": 1.0,
+       "roc_auc": 1.0
+      },
+      "BEARING_INNER_RACE": {
+       "detection_rate": 1.0,
+       "roc_auc": 1.0
+      },
+      "BEARING_OUTER_RACE": {
+       "detection_rate": 1.0,
+       "roc_auc": 1.0
+      }
+     }
+    },
+    {
+     "setup": "rolling bearing | CWRU_load2",
+     "healthy_train_segments": 25,
+     "false_alarm_rate": 0.0,
+     "labels": {
+      "BEARING_BALL": {
+       "detection_rate": 1.0,
+       "roc_auc": 1.0
+      },
+      "BEARING_INNER_RACE": {
+       "detection_rate": 1.0,
+       "roc_auc": 1.0
+      },
+      "BEARING_OUTER_RACE": {
+       "detection_rate": 1.0,
+       "roc_auc": 1.0
+      }
+     }
+    },
+    {
+     "setup": "rolling bearing | CWRU_load3",
+     "healthy_train_segments": 25,
+     "false_alarm_rate": 0.2222222222222222,
+     "labels": {
+      "BEARING_BALL": {
+       "detection_rate": 1.0,
+       "roc_auc": 0.9969135802469136
+      },
+      "BEARING_INNER_RACE": {
+       "detection_rate": 1.0,
+       "roc_auc": 1.0
+      },
+      "BEARING_OUTER_RACE": {
+       "detection_rate": 1.0,
+       "roc_auc": 1.0
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "seconds": 4.533912375
+}

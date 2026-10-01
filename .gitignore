@@ -27,3 +27,6 @@ venv/
 /RS4/
 /RS5/
 /RS6/
+
+# Experiment data cache (rebuilt automatically)
+**/results/experiments/.runs_*.pkl

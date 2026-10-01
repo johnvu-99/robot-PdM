@@ -155,6 +155,12 @@ def _protocol_runs(ctx, params):
     elif protocol == "PHM_LEARNING_TO_FULL_TEST":
         train = _runs(ctx, phm, lambda r: r.meta.get("subset") == "Learning_set")
         test = _runs(ctx, phm, lambda r: r.meta.get("subset") == "Full_Test_Set")
+    elif protocol == "XJTU_PLUS_PHM_TO_FULL_TEST":
+        xjtu = all_adapters["XJTU_SY"]
+        if not xjtu.available() or not xjtu.discover():
+            raise ValueError("XJTU-SY not found at %s." % xjtu.root)
+        train = _runs(ctx, xjtu) + _runs(ctx, phm, lambda r: r.meta.get("subset") == "Learning_set")
+        test = _runs(ctx, phm, lambda r: r.meta.get("subset") == "Full_Test_Set")
     else:
         raise ValueError("unknown protocol %s" % protocol)
     if not train:
@@ -166,14 +172,16 @@ def _protocol_runs(ctx, params):
 def job_train_rul(ctx, params):
     kind = params.get("model", config.RUL_DEFAULT_MODEL)
     protocol, train, test = _protocol_runs(ctx, params)
+    reference = config.RUL_LOUDNESS_REFERENCE_BY_PROTOCOL.get(protocol, config.RUL_LOUDNESS_REFERENCE)
+    fpt_gate = config.RUL_FPT_GATE_BY_PROTOCOL.get(protocol, False)
     cv = []
     if len(train) >= 3:
         ctx.progress("Leave one run out cross validation (%d folds)" % len(train))
-        cv = leave_one_run_out(train, kind)
+        cv = leave_one_run_out(train, kind, reference, fpt_gate)
     ctx.check()
     ctx.progress("Fitting %s on %d training runs" % (kind, len(train)))
     started = time.perf_counter()
-    model = RULModel(kind).fit(train)
+    model = RULModel(kind).fit(train, reference, fpt_gate)
     stamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     path = params.get("path") or os.path.join(config.MODEL_DIR, "rul_%s_%s_%s.joblib"
                                               % (kind.lower(), protocol.lower(), stamp))
