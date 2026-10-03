@@ -1810,15 +1810,76 @@ Bearing3_5 rank 1.00 → −0.68, PHM Bearing2_6 MAE 0.061 → 0.161). No improv
 on average. **Rejected by the rule** — and this time it is a decision, not a
 shrug.
 
+### Result 3 — which fix causes the damage in the reverse direction?
+
+Each fix switched on alone, and in pairs (View A; `eval32.py A ...`):
+
+| Version | XJTU → PHM MAE | PHM → XJTU MAE | Rank, all 32 |
+| --- | --- | --- | --- |
+| Original (no fixes) | 0.216 | 0.280 | 0.54 |
+| Smoothing only | 0.203 | 0.281 | 0.69 |
+| Gate only | 0.202 | 0.280 | 0.56 |
+| Quietest reference only | 0.221 | **0.300** | 0.62 |
+| Gate + smoothing | 0.191 | 0.281 | 0.70 |
+| Quietest + smoothing | 0.196 | **0.310** | 0.81 |
+| All three (current) | **0.175** | **0.310** | **0.83** |
+
+**What it says.**
+- **The quietest-point reference is the one that hurts PHM → XJTU.** Smoothing
+  and the gate leave that direction unchanged (0.280–0.281); every version with
+  the quietest reference is at 0.300–0.310.
+- **It is also the one that buys the ordering** (rank 0.70 → 0.83) and the last
+  step on XJTU → PHM (0.191 → 0.175).
+- **Why, most likely** (a hypothesis that fits section 9, not proven): PHM
+  bearings start rough and settle. A model TRAINED on PHM uses "how much quieter
+  than at the start" as a clock. The quietest reference removes that clock, so
+  the PHM-trained model loses information. A model trained on XJTU never had
+  that clock, so for it the quietest reference only removes a source of error.
+- **So the reference depends on the TRAINING lab, not on "transfer or not".**
+  A tempting move is to switch it per direction (quietest for XJTU → PHM, start
+  for PHM → XJTU; MAE would be 0.175 and 0.281). That would be choosing a
+  setting on the very bearings it is scored on, so it is **not adopted** on this
+  evidence. It is the first thing to test when a third lab's data is available.
+
+### Result 4 — three new ideas (none adopted)
+
+Compared with the current system, View A, all 32 bearings:
+
+| Idea | MAE change [95% interval] | Better / worse | Rank change |
+| --- | --- | --- | --- |
+| Smooth over 5% of the bearing's age | +0.004 [−0.010, +0.016] | 9 / 20 | −0.11 |
+| Smooth over 10% of the bearing's age | +0.005 [−0.008, +0.016] | 9 / 16 | −0.09 |
+| Smooth over 20% of the bearing's age | +0.007 [−0.004, +0.016] | 9 / 16 | −0.04 |
+| Asymmetric smoothing (5 min down, 15 min up) | 0.000 [−0.011, +0.011] | 13 / 16 | −0.11 |
+| Asymmetric smoothing (2 min down, 15 min up) | +0.001 [−0.018, +0.017] | 13 / 18 | −0.15 |
+| Average of the three model types | −0.009 [−0.021, +0.003] | 20 / 9 | +0.03 |
+| Average of random forest + gradient boosting | −0.009 [−0.019, +0.001] | 18 / 10 | +0.03 |
+
+- **Age-relative smoothing: rejected.** The guess that fixed time windows were
+  the problem was wrong: no gain in either direction, and the ordering got
+  worse. Result 3 shows the real cause is the reference, not the windows.
+- **Asymmetric smoothing: rejected.** No change in error, worse ordering:
+  letting drops through quickly lets downward noise through too.
+- **Model averaging: not adopted — but the only idea that points the right
+  way.** It helps 18–20 bearings and hurts 9–10, mostly in the PHM → XJTU
+  direction (0.310 → 0.283). The interval still touches zero, the rule says no,
+  and 13 versions were tried at once, which makes a near miss weaker, not
+  stronger. Worth re-testing when there are more bearings.
+
+**Where this leaves the model.** With the data available, no tested change
+improves the "new machine" error in both directions. The limit now is evidence
+(32 bearings, two labs), not ideas.
+
 ### What changes from here
 
 - **Evaluation:** new RUL ideas are judged with `eval32.py` and the rule above.
   It takes about 10 minutes per variant; results are cached per variant name.
 - **Claims:** the top-level README now gives both directions.
 - **Next ideas must help both directions**, or be switched on per direction
-  with that stated openly. Promising, given the above: express the settings
-  relative to each bearing instead of in fixed seconds (the 10 minute windows
-  are short for a 42 hour bearing and long for a 38 minute one).
+  with that stated openly.
+- **The most valuable next step is a third lab's run-to-failure data**: it
+  would give an untouched place to decide the per-direction reference and the
+  model averaging, both of which are plausible and unproven.
 
 ### Lessons
 

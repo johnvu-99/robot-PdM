@@ -144,3 +144,7 @@ frozen files in `raw/` are from 28 September, before these changes.
 | 2026-10-03 | B3 again: kurtosis counts only once RMS has grown 0.2 | 32 bearings | +0.006 vs current | — | — | XJTU Bearing3_5 rank 1.00 → −0.68 | No | interval [−0.021, +0.032] contains 0 in view A; 10 better / 14 worse |
 
 Section 12 of `CODE_GUIDE_MECHANICAL.md` explains these rows and corrects the "new machine" claim.
+| 2026-10-03 | Which fix hurts PHM → XJTU? (each fix alone and in pairs) | 32 bearings, new machine | — | — | — | — | diagnosis | the quietest-point reference: PHM → XJTU MAE 0.280 → 0.300–0.310; smoothing and gate leave it at 0.280. It also gives the ordering (rank 0.70 → 0.83). Per-direction switch not adopted (would be chosen on the scored bearings) |
+| 2026-10-03 | Smoothing over 5 / 10 / 20% of the bearing's age | 32 bearings | +0.004 to +0.007 vs current | — | −0.04 to −0.11 | — | No | no gain, worse ordering |
+| 2026-10-03 | Asymmetric smoothing (fast down, slow up) | 32 bearings | 0.000 / +0.001 | — | −0.11 / −0.15 | — | No | lets downward noise through |
+| 2026-10-03 | Average of model types (3, or RF + GB) | 32 bearings | −0.009 | — | +0.03 | helps 18–20, hurts 9–10 | No (yet) | interval [−0.021, +0.003] / [−0.019, +0.001] touches zero; 13 versions tested at once |

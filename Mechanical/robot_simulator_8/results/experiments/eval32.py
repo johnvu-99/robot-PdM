@@ -15,7 +15,7 @@ Decision rule, fixed before the first run: adopt a change only if in View A the
 mean MAE improves AND the interval excludes zero, and View B is not worse
 (its interval must not lie entirely above zero).
 
-    python results/experiments/eval32.py [variant ...]
+    python results/experiments/eval32.py [A|B|AB] [variant ...]
 """
 
 import os
@@ -48,12 +48,71 @@ rul_model._make_estimator = _fast
 SETTINGS = ("RUL_KURTOSIS_NEEDS_GROWTH", "RUL_CROSS_DATASET_SMOOTHING_TAU_S", "RUL_FPT_STD_FLOOR")
 DEFAULTS = dict((name, getattr(config, name)) for name in SETTINGS)
 
+def _ema_variable(prediction, times, tau_of):
+    """Causal EMA whose time constant may change at every step: tau_of(i, value, smoothed so far)."""
+    out = np.empty_like(prediction)
+    acc, previous = prediction[0], times[0]
+    for i, v in enumerate(prediction):
+        alpha = 1.0 - np.exp(-max(times[i] - previous, 0.0) / tau_of(i, v, acc))
+        previous = times[i]
+        acc = alpha * v + (1.0 - alpha) * acc
+        out[i] = acc
+    return out
+
+
+def post_relative(fraction, cap_s, floor_s=60.0):
+    """Smooth over a fraction of the time the bearing has lived so far (known live)."""
+    def post(prediction, run):
+        times = np.asarray(run["times"], float)
+        return _ema_variable(prediction, times, lambda i, v, acc: min(cap_s, max(floor_s, fraction * (times[i] - times[0]))))
+    return post
+
+
+def post_asymmetric(tau_down, tau_up):
+    """React quickly when the prediction falls, slowly when it rises."""
+    def post(prediction, run):
+        times = np.asarray(run["times"], float)
+        return _ema_variable(prediction, times, lambda i, v, acc: tau_down if v < acc else tau_up)
+    return post
+
+
+NO_SMOOTH = {"RUL_CROSS_DATASET_SMOOTHING_TAU_S": 0.0}
+
+# name: dict(reference, gate, config overrides, post = replaces the built in smoothing, kinds = models averaged)
 VARIANTS = {
-    # name: (loudness reference, gate, config overrides)
-    "current":        ("QUIETEST", True, {}),
-    "original_28sep": ("START", False, {"RUL_CROSS_DATASET_SMOOTHING_TAU_S": 0.0}),
-    "b3_kurtosis":    ("QUIETEST", True, {"RUL_KURTOSIS_NEEDS_GROWTH": 0.2}),
+    "current":          dict(reference="QUIETEST", gate=True),
+    "original_28sep":   dict(reference="START", gate=False, config=NO_SMOOTH),
+    "b3_kurtosis":      dict(reference="QUIETEST", gate=True, config={"RUL_KURTOSIS_NEEDS_GROWTH": 0.2}),
+    # Which fix does what? One at a time, on top of the original.
+    "only_smoothing":   dict(reference="START", gate=False),
+    "only_quietest":    dict(reference="QUIETEST", gate=False, config=NO_SMOOTH),
+    "only_gate":        dict(reference="START", gate=True, config=NO_SMOOTH),
+    "quietest_smooth":  dict(reference="QUIETEST", gate=False),
+    "gate_smooth":      dict(reference="START", gate=True),
+    # Step 3 ideas, on top of the current system.
+    "rel_smooth_05":    dict(reference="QUIETEST", gate=True, config=NO_SMOOTH, post=post_relative(0.05, 3600.0)),
+    "rel_smooth_10":    dict(reference="QUIETEST", gate=True, config=NO_SMOOTH, post=post_relative(0.10, 3600.0)),
+    "rel_smooth_20":    dict(reference="QUIETEST", gate=True, config=NO_SMOOTH, post=post_relative(0.20, 7200.0)),
+    "asym_300_900":     dict(reference="QUIETEST", gate=True, config=NO_SMOOTH, post=post_asymmetric(300.0, 900.0)),
+    "asym_120_900":     dict(reference="QUIETEST", gate=True, config=NO_SMOOTH, post=post_asymmetric(120.0, 900.0)),
+    "avg_3_models":     dict(reference="QUIETEST", gate=True, kinds=config.RUL_MODELS),
+    "avg_rf_gb":        dict(reference="QUIETEST", gate=True, kinds=("RANDOM_FOREST", "GRADIENT_BOOSTING")),
 }
+
+
+class Predictor(object):
+    """One or several model types (averaged), then an optional post-processing step."""
+
+    def __init__(self, spec, train):
+        self.post = spec.get("post")
+        self.models = [rul_model.RULModel(kind).fit(train, spec["reference"], spec["gate"])
+                       for kind in spec.get("kinds", ("RANDOM_FOREST",))]
+
+    def predict(self, run):
+        prediction = np.mean([m.predict_run(run)[0] for m in self.models], axis=0)
+        if self.post is not None:
+            prediction = np.clip(self.post(prediction, run), 0.0, 1.0)
+        return prediction
 
 
 def load():
@@ -62,27 +121,22 @@ def load():
     return xjtu, phm
 
 
-def evaluate(name, xjtu, phm, views):
-    reference, gate, overrides = VARIANTS[name]
-    for key, value in dict(DEFAULTS, **overrides).items():
+def evaluate(name, xjtu, phm, view):
+    spec = VARIANTS[name]
+    for key, value in dict(DEFAULTS, **spec.get("config", {})).items():
         setattr(config, key, value)
-    out = {}
-    if "A" in views:
-        rows = {}
+    rows = {}
+    if view == "A":
         for train, test in ((xjtu, phm), (phm, xjtu)):
-            model = rul_model.RULModel("RANDOM_FOREST").fit(train, reference, gate)
+            predictor = Predictor(spec, train)
             for run in test:
-                rows[run["run_id"]] = run_metrics(run, model.predict_run(run)[0])
-        out["A"] = rows
-    if "B" in views:
-        rows = {}
+                rows[run["run_id"]] = run_metrics(run, predictor.predict(run))
+    else:
         everything = xjtu + phm
         for held_out in everything:
-            others = [r for r in everything if r["run_id"] != held_out["run_id"]]
-            model = rul_model.RULModel("RANDOM_FOREST").fit(others, reference, gate)
-            rows[held_out["run_id"]] = run_metrics(held_out, model.predict_run(held_out)[0])
-        out["B"] = rows
-    return out
+            predictor = Predictor(spec, [r for r in everything if r["run_id"] != held_out["run_id"]])
+            rows[held_out["run_id"]] = run_metrics(held_out, predictor.predict(held_out))
+    return rows
 
 
 def paired(rows, base, key="mae"):
@@ -100,6 +154,9 @@ def mean(rows, key, only=None):
 
 
 def main(names):
+    views = "AB"
+    if names and names[0] in ("A", "B", "AB"):          # first argument may limit the views
+        views, names = names[0], names[1:]
     names = names or list(VARIANTS)
     if "current" not in names:
         names = ["current"] + names
@@ -107,12 +164,13 @@ def main(names):
     cache_path = os.path.join(HERE, ".eval32_cache.pkl")
     cache = pickle.load(open(cache_path, "rb")) if os.path.exists(cache_path) else {}
     for name in names:
-        if name not in cache:
-            cache[name] = evaluate(name, xjtu, phm, "AB")
-            pickle.dump(cache, open(cache_path, "wb"))
+        for view in views:
+            if view not in cache.setdefault(name, {}):
+                cache[name][view] = evaluate(name, xjtu, phm, view)
+                pickle.dump(cache, open(cache_path, "wb"))
     titles = {"A": "View A, new machine (train on one lab, test on the other; 32 bearings)",
               "B": "View B, new bearing (leave one out of all 32)"}
-    for view in "AB":
+    for view in views:
         print("\n%s" % titles[view])
         print("  %-16s %6s %6s %6s | %-13s %-13s | %s" % (
             "variant", "MAE", "R2", "rank", "PHM bearings", "XJTU bearings", "MAE vs current: mean [95% interval], better / worse"))
@@ -124,9 +182,11 @@ def main(names):
             if name != "current":
                 d, low, high, better, worse = paired(rows, cache["current"][view])
                 line += " %+.3f [%+.3f, %+.3f], %d / %d" % (d, low, high, better, worse)
+                r, r_low, r_high, _, _ = paired(rows, cache["current"][view], "rank_correlation")
+                line += " | rank %+.2f [%+.2f, %+.2f]" % (r, r_low, r_high)
             print(line)
     if os.environ.get("PER_BEARING"):
-        for view in "AB":
+        for view in views:
             print("\nPer bearing, view %s (MAE / rank): %s" % (view, ", ".join(names)))
             for run_id in sorted(cache["current"][view]):
                 print("  %-18s %s" % (run_id, "   ".join("%.3f / %5.2f" % (
