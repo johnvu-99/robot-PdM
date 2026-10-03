@@ -35,7 +35,7 @@ as the git tag [`phase-7`](https://github.com/johnvu-99/robot-PdM/tree/phase-7).
 | [`README.md`](Mechanical/robot_simulator_8/README.md) | architecture, install, how to run, all results |
 | [`CODE_GUIDE_MECHANICAL.md`](Mechanical/robot_simulator_8/CODE_GUIDE_MECHANICAL.md) | code walkthrough; sections 9 to 11 are the full story of the experiments, including the ones that failed |
 | [`results/baseline_2026-09-28/`](Mechanical/robot_simulator_8/results/baseline_2026-09-28) | frozen baseline of every model and the experiment log |
-| [`tests/`](Mechanical/robot_simulator_8/tests) | about 65 tests, run on every push |
+| [`tests/`](Mechanical/robot_simulator_8/tests) | about 70 tests, run on every push |
 | [`PARTNER_DATA_SPEC.md`](Mechanical/robot_simulator_8/PARTNER_DATA_SPEC.md) | how a partner should record and hand over robot data |
 
 ## Datasets

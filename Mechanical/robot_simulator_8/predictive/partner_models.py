@@ -103,7 +103,7 @@ def train_anomaly(data):
             flagged = {}
             for group in sorted(set(groups[in_setup])):
                 scores = model.score(x[in_setup & (groups == group)])
-                flagged[group] = float(np.mean([s["anomalous"] for s in scores]))
+                flagged[group] = float(np.mean([s["alarm"] for s in scores]))
             report["anomalous_fraction_per_run"] = flagged
         models[setup] = model
         reports.append(report)
@@ -217,7 +217,7 @@ def score(bundle, data):
         scores = model.score(data["X"][mask])
         worst = max(scores, key=lambda s: s["ratio"])
         entry = {"stream": stream, "setup_model": model.setup, "windows": len(scores),
-                 "anomalous_fraction": float(np.mean([s["anomalous"] for s in scores])),
+                 "anomalous_fraction": float(np.mean([s["alarm"] for s in scores])),
                  "worst_ratio": worst["ratio"], "worst_features": worst["top_features"]}
         if bundle.get("classifier") is not None:
             predicted = bundle["classifier"].predict(data["X"][mask])

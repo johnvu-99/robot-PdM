@@ -78,8 +78,7 @@ def build(setups):
         for recording, features, _ in faulty:
             _, test_idx = time_blocks(features.shape[0])
             fault_test.setdefault(recording.label, []).append(features[test_idx])
-        report = model.evaluate(np.vstack(healthy_test),
-                                dict((k, np.vstack(v)) for k, v in fault_test.items()))
+        report = model.evaluate(healthy_test, fault_test)     # lists: one block per recording
         report["healthy_recordings"] = [r.recording_id for r, _, _ in healthy]
         models[key] = model
         reports.append(report)
@@ -92,8 +91,9 @@ def print_reports(reports):
         if "skipped" in report:
             print("   skipped: %s" % report["skipped"])
             continue
-        print("   healthy test windows %d, false alarm rate %.1f%%"
-              % (report["healthy_test_windows"], 100 * report["false_alarm_rate"]))
+        print("   healthy test windows %d, false alarm rate %.1f%%  (single windows flagged: %.1f%%)"
+              % (report["healthy_test_windows"], 100 * report["false_alarm_rate"],
+                 100 * report["window_false_alarm_rate"]))
         if not report["labels"]:
             print("   no fault recordings for this setup (model still usable for scoring)")
         for label, r in report["labels"].items():
@@ -155,9 +155,9 @@ def command_score(args):
             continue
         features, _ = adapter.extract_features(recording)
         results = model.score(features)
-        flagged = sum(r["anomalous"] for r in results)
+        flagged = sum(r["alarm"] for r in results)
         print("\n%s  (setup %s, file label %s)" % (os.path.basename(path), key, recording.label))
-        print("   %d / %d windows anomalous (%.0f%%)" % (flagged, len(results), 100.0 * flagged / len(results)))
+        print("   %d / %d windows in alarm (%.0f%%)" % (flagged, len(results), 100.0 * flagged / len(results)))
         worst = max(results, key=lambda r: r["ratio"])
         print("   worst window score/threshold %.2f, top deviations: %s"
               % (worst["ratio"], ", ".join("%s z=%+.1f" % f for f in worst["top_features"])))

@@ -1,0 +1,52 @@
+== CWRU | rolling bearing | CWRU_load0
+   healthy test windows 9, false alarm rate 0.0%  (single windows flagged: 0.0%)
+   BEARING_BALL                   detected  87.0%
+   BEARING_INNER_RACE             detected  94.4%
+   BEARING_OUTER_RACE             detected  94.4%
+== CWRU | rolling bearing | CWRU_load1
+   healthy test windows 18, false alarm rate 0.0%  (single windows flagged: 0.0%)
+   BEARING_BALL                   detected  87.0%
+   BEARING_INNER_RACE             detected  94.4%
+   BEARING_OUTER_RACE             detected  94.4%
+== CWRU | rolling bearing | CWRU_load2
+   healthy test windows 18, false alarm rate 0.0%  (single windows flagged: 0.0%)
+   BEARING_BALL                   detected  94.4%
+   BEARING_INNER_RACE             detected  94.4%
+   BEARING_OUTER_RACE             detected  94.4%
+== CWRU | rolling bearing | CWRU_load3
+   healthy test windows 18, false alarm rate 0.0%  (single windows flagged: 22.2%)
+   BEARING_BALL                   detected  94.4%
+   BEARING_INNER_RACE             detected  94.4%
+   BEARING_OUTER_RACE             detected  94.4%
+== SEU | bearingset | SEU_20-0
+   healthy test windows 72, false alarm rate 2.8%  (single windows flagged: 9.7%)
+   BEARING_BALL                   detected  98.6%
+   BEARING_COMBINED_INNER_OUTER   detected  98.6%
+   BEARING_INNER_RACE             detected  98.6%
+   BEARING_OUTER_RACE             detected  98.6%
+== SEU | bearingset | SEU_30-2
+   healthy test windows 72, false alarm rate 4.2%  (single windows flagged: 12.5%)
+   BEARING_BALL                   detected  98.6%
+   BEARING_COMBINED_INNER_OUTER   detected  98.6%
+   BEARING_INNER_RACE             detected  98.6%
+   BEARING_OUTER_RACE             detected  98.6%
+== SEU | gearset | SEU_20-0
+   healthy test windows 72, false alarm rate 0.0%  (single windows flagged: 4.2%)
+   GEAR_CHIPPED_TOOTH             detected  98.6%
+   GEAR_MISSING_TOOTH             detected  98.6%
+   GEAR_ROOT_CRACK                detected  98.6%
+   GEAR_SURFACE_WEAR              detected  98.6%
+== SEU | gearset | SEU_30-2
+   healthy test windows 72, false alarm rate 1.4%  (single windows flagged: 11.1%)
+   GEAR_CHIPPED_TOOTH             detected  98.6%
+   GEAR_MISSING_TOOTH             detected  98.6%
+   GEAR_ROOT_CRACK                detected  98.6%
+   GEAR_SURFACE_WEAR              detected  98.6%
+  setup load_5kg | joint 1: trained on 304 windows; tested on held out runs run_03, run_04, run_09, run_12
+    false alarm rate on unseen normal data: 0.0%
+  setup load_5kg | joint 2: trained on 114 windows; tested on held out runs run_01
+    false alarm rate on unseen normal data: 0.0%
+    BACKLASH                 detected   5.3%
+    BEARING                  detected  30.3%
+    COOLING                  detected  71.1%
+    FRICTION                 detected  96.1%

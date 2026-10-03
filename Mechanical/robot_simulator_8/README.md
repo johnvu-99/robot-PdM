@@ -132,7 +132,7 @@ pip install -r requirements-test.txt
 python -m pytest tests -q
 ```
 
-About 65 tests, a few seconds, no downloaded datasets needed: they build small
+About 70 tests, a few seconds, no downloaded datasets needed: they build small
 synthetic bearings and dataset folders, and write only to a temporary folder.
 They run automatically on every push (GitHub Actions, `.github/workflows/tests.yml`).
 
@@ -971,6 +971,11 @@ experiment, including the rejected ones, and the reasoning behind each is in
   healthy (`ANOMALY_FEATURE_CHECK`): the smallest CWRU ball fault at load 0 went
   from 64.8% to 96.3% detected, for about +1.4 points of false alarms on three
   SEU setups.
+
+- An alarm now needs **two flagged windows in a row** (`ANOMALY_PERSISTENCE_WINDOWS`):
+  false alarms on healthy data fell from 8.8% to 1.7% over all SEU and CWRU
+  setups (CWRU load 3: 22.2% -> 0%). Cost: a one window delay, and weakly
+  detected faults are caught less often (synthetic backlash 23.7% -> 5.3%).
 
 Explained in CODE_GUIDE sections 10 and 11.
 

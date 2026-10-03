@@ -25,7 +25,7 @@ Contents
 8. Where to change what
 9. Improving XJTU → PHM: every experiment and the thinking behind it
 10. Uncertainty ranges: how sure is the prediction?
-11. Two weaknesses the tests found, and how they were fixed
+11. Two weaknesses the tests found, and how they were fixed (plus false alarms)
 
 ---
 
@@ -624,8 +624,18 @@ features moderately, and a forest spread over ~100 features averages that
 away: on test data the forest alone caught 6.6% of cooling windows, with the
 thermal check 75%.
 
-`evaluate(healthy_test, faulty_by_label)` — reports:
-- false alarm rate: share of unseen healthy windows flagged;
+Each result also has `alarm`: true only if this window AND the one before it
+are flagged (`ANOMALY_PERSISTENCE_WINDOWS = 2`, section 11.3). `anomalous` is
+about one window; `alarm` is what a person should be told. For `alarm` to mean
+something, `x` must be one recording in time order.
+
+**`persistent_alarms(flags, windows)`** — turns per window flags into alarms.
+
+`evaluate(healthy_test, faulty_by_label)` — each input is one array or a list
+of arrays (one per recording, so persistence never crosses recordings). The
+rates count alarms; the per window rates are kept as `window_false_alarm_rate`
+and `window_detection_rate`. Reports:
+- false alarm rate: share of unseen healthy windows in alarm;
 - per fault label: detection rate, share caught by the thermal check, ROC AUC,
   median score / threshold, and the most deviating features.
 
@@ -1016,6 +1026,7 @@ python -m tools.partner_data score    --root FOLDER --model FILE
 | `PARTNER_RATE_TOLERANCE` | 0.05 | allowed mismatch between timestamps and declared rate |
 | `THERMAL_RATIO_WARN` | 1.6 | thermal alarm at 1.6 × the healthy temperature rise |
 | `ANOMALY_FEATURE_CHECK` | True | also alarm when any single feature is extremely far from healthy (section 11) |
+| `ANOMALY_PERSISTENCE_WINDOWS` | 2 | an alarm needs this many flagged windows in a row (section 11.3); 1 = every flag is an alarm |
 | `ANOMALY_FEATURE_Z_PERCENTILE` / `ANOMALY_FEATURE_Z_MIN` | 99 / 6 | single feature threshold: 99th percentile on held-out healthy data, never below 6 robust std |
 
 The anomaly engine also uses the partner threshold and calibration settings
@@ -1063,6 +1074,10 @@ when it runs on Mechanical-datasets.
 - **The uncertainty ranges are honest but wide.** A 90% range is the
   prediction ± 0.42: about 0.70 of the whole 0-to-1 scale. That is the model's
   real precision. On single bearings coverage can be lower (73% on Bearing1_1).
+- **Persistence trades weak detections for fewer false alarms.** Faults seen in
+  nearly every window lose only the first window (a short delay). Faults seen
+  in a minority of windows lose a lot: on the synthetic partner data, backlash
+  fell from 23.7% to 5.3% and bearing from 52.6% to 30.3% (section 11.3).
 - **The single feature check costs a few false alarms** (about +1.4 points on
   three SEU setups) and its settings were fixed in advance, not tuned.
 - **Partner results so far come from synthetic data** and say nothing about real
@@ -1626,7 +1641,61 @@ gate). Bearing2_3 improved a little (rank 0.32 → 0.44).
 "12 std" made dev clearly worse: a multiple of a too-small number is still
 unreliable. The minimum spread attacks the cause — the spread estimate itself.
 
-### What both fixes have in common
+### 11.3 False alarms on healthy data (CWRU load 3: 22%)
+
+**Observe.** 4 of the 18 healthy test windows at CWRU load 3 were flagged.
+
+**Look before fixing.**
+- All 4 came from the forest, none from the single feature check.
+- They barely crossed the line: the worst score was 1.13 × the threshold.
+- RMS and kurtosis do not drift in that recording (0.0674 → 0.0672).
+- The healthy recording has only 59 windows; the threshold is set from 11.
+- The flagged windows were isolated: positions 1, 8, 15 and 17 of the block.
+
+**Explain.** Mostly a small-sample effect. A threshold estimated from 11
+windows gives roughly 12% false alarms even when nothing is wrong (an estimate,
+not a measurement), so 4 of 18 is only a little more than chance. And noise
+flags single windows; a real fault is flagged in runs.
+
+**Rule, written down before measuring:** a window raises an alarm only if it
+and the window just before it, in the same recording, are both flagged. The
+simulator already works this way (its health score waits for 5 windows).
+
+**Result** (`results/experiments/anomaly_persistence.py`, then the real tools):
+
+| Setup | False alarms: before → after |
+| --- | --- |
+| CWRU load 3 | 22.2% → 0.0% |
+| SEU bearing 20-0 | 9.7% → 2.8% |
+| SEU bearing 30-2 | 12.5% → 4.2% |
+| SEU gear 20-0 | 4.2% → 0.0% |
+| SEU gear 30-2 | 11.1% → 1.4% |
+| CWRU loads 0–2 | 0% → 0% |
+| **All setups, weighted** | **8.8% → 1.7%** |
+
+**The cost, and how to read it.**
+- Faults flagged in every window go from 100% to 94.4% (CWRU, 18 windows per
+  recording) or 98.6% (SEU, 72). That is exactly one window per recording: the
+  first window can never be an alarm. It is a **delay of one window, not a
+  missed fault**.
+- The smallest CWRU ball fault: 96.3% → 87.0% at loads 0 and 1.
+- **Weakly detected faults lose a lot.** On the synthetic partner data:
+  backlash 23.7% → 5.3%, bearing 52.6% → 30.3%, cooling 75.0% → 71.1%,
+  friction 98.7% → 96.1%. A fault seen in one window out of four rarely gives
+  two in a row.
+
+**Also tested: training without the dominant frequency features** (a
+peak-picking feature that jumps between frequency bins, and the feature most
+off in the flagged windows). False alarms did not improve (8.8% → 10.0% before
+the rule) and the smallest ball fault got worse (96.3% → 90.7%). **Rejected.**
+
+**Decision: kept** (`ANOMALY_PERSISTENCE_WINDOWS = 2`). An operator who gets a
+false alarm in one healthy window out of eleven stops trusting the system; a
+one window delay costs little. The price is real for weak faults, so both
+numbers are always reported: the tools print the alarm rate and, next to it,
+the share of single windows flagged. Set the value to 1 to switch it off.
+
+### What these fixes have in common
 
 1. **A test asked a simple question the experiments never did** ("what happens
    on a bearing that never wears?", "what if only one feature changes?").
@@ -1635,3 +1704,6 @@ unreliable. The minimum spread attacks the cause — the spread estimate itself.
    failure, so it could not be forgotten or hidden.
 3. **Each fix has a test that fails without it.** Switch the minimum spread or
    the single feature check off and a test goes red again.
+4. **Every fix has a price, and the price is written next to the gain.** The
+   single feature check added a few false alarms; persistence removed them and
+   more, but hides weak faults.

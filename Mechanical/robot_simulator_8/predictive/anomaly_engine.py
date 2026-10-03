@@ -41,6 +41,27 @@ import config
 MAD_TO_STD = 1.4826
 
 
+def persistent_alarms(flags, windows=None):
+    """
+    flags: per window booleans in time order, one recording. A window is an
+    alarm only if it and the (windows - 1) before it are all flagged, so the
+    first (windows - 1) windows of a recording can never be alarms.
+    """
+    windows = config.ANOMALY_PERSISTENCE_WINDOWS if windows is None else windows
+    flags = np.asarray(flags, dtype=bool)
+    out = flags.copy()
+    for shift in range(1, max(1, int(windows))):
+        earlier = np.zeros_like(flags)
+        earlier[shift:] = flags[:-shift]
+        out &= earlier
+    return out
+
+
+def _blocks(x):
+    """One array, or a list of arrays (one per recording, so persistence does not cross recordings)."""
+    return [np.asarray(b, dtype=np.float64) for b in x] if isinstance(x, (list, tuple)) else [np.asarray(x, dtype=np.float64)]
+
+
 class AnomalyModel(object):
 
     THERMAL_MARKERS = ("_rise_over_ambient", "_rise_per_watt", "_rise_since_start")
@@ -134,7 +155,12 @@ class AnomalyModel(object):
         return np.nanmax(ratios, axis=1) if ratios.size else np.full(values.shape[0], np.nan)
 
     def score(self, x, top=3):
-        """Per window dict: score, threshold ratio, anomalous flag, top deviating features."""
+        """
+        Per window dict: score, threshold ratio, top deviating features, and
+        two flags. "anomalous": this window alone looks abnormal. "alarm": it
+        and the windows just before it do (ANOMALY_PERSISTENCE_WINDOWS); x must
+        be one recording in time order for that to mean something.
+        """
         x = np.asarray(x, dtype=np.float64)
         scores = self.raw_scores(x)
         z = (x - self.median) / self.mad
@@ -154,36 +180,45 @@ class AnomalyModel(object):
                 "thermal_alarm": hot,
                 "top_features": [(self.feature_names[k], float(z[i, k])) for k in order],
             })
+        for result, alarm in zip(results, persistent_alarms([r["anomalous"] for r in results])):
+            result["alarm"] = bool(alarm)
         return results
 
     # -- evaluation ---------------------------------------------------------
 
     def evaluate(self, healthy_test, faulty_by_label):
-        """False alarm rate on unseen healthy windows; detection rate and ROC AUC per fault label."""
+        """
+        False alarm rate on unseen healthy windows; detection rate and ROC AUC
+        per fault label. Rates count ALARMS (with persistence); the per window
+        rates without persistence are reported as window_*. Each input is one
+        array or a list of arrays, one per recording.
+        """
         from sklearn.metrics import roc_auc_score
 
-        healthy = self.score(healthy_test)
+        healthy = [r for block in _blocks(healthy_test) for r in self.score(block)]
         healthy_scores = np.array([h["score"] for h in healthy])
-        healthy_flags = np.array([h["anomalous"] for h in healthy])
         report = {"setup": self.setup, "threshold": self.threshold,
                   "healthy_test_windows": int(healthy_scores.shape[0]),
-                  "false_alarm_rate": float(np.mean(healthy_flags)),
+                  "false_alarm_rate": float(np.mean([h["alarm"] for h in healthy])),
+                  "window_false_alarm_rate": float(np.mean([h["anomalous"] for h in healthy])),
+                  "persistence_windows": int(config.ANOMALY_PERSISTENCE_WINDOWS),
                   "thermal_check": bool(self.thermal_columns and self.thermal_reference is not None),
                   "labels": {}}
         for label, x in sorted(faulty_by_label.items()):
-            if x.shape[0] == 0:
+            blocks = [b for b in _blocks(x) if b.shape[0]]
+            if not blocks:
                 continue
-            results = self.score(x)
+            results = [r for block in blocks for r in self.score(block)]
             scores = np.array([r["score"] for r in results])
-            flags = np.array([r["anomalous"] for r in results])
             y = np.r_[np.zeros(healthy_scores.shape[0]), np.ones(scores.shape[0])]
             report["labels"][label] = {
                 "windows": int(scores.shape[0]),
-                "detection_rate": float(np.mean(flags)),
+                "detection_rate": float(np.mean([r["alarm"] for r in results])),
+                "window_detection_rate": float(np.mean([r["anomalous"] for r in results])),
                 "thermal_alarm_rate": float(np.mean([bool(r["thermal_alarm"]) for r in results])),
                 "roc_auc": float(roc_auc_score(y, np.r_[healthy_scores, scores])),
                 "median_ratio": float(np.median(scores / self.threshold)),
-                "top_features": _top_features(self, x),
+                "top_features": _top_features(self, np.vstack(blocks)),
             }
         return report
 

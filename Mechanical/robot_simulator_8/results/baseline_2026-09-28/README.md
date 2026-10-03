@@ -138,3 +138,5 @@ Full explanation of every row: `CODE_GUIDE_MECHANICAL.md`, section 9.
 
 Sections 10 and 11 of `CODE_GUIDE_MECHANICAL.md` explain these four rows. Note: the
 frozen files in `raw/` are from 28 September, before these changes.
+| 2026-10-03 | **Anomaly alarms need 2 flagged windows in a row** (rule fixed before measuring) | SEU + CWRU | — | — | — | synthetic backlash 23.7% → 5.3% detected | **Yes** | false alarms 8.8% → 1.7% overall, CWRU load 3 22.2% → 0%; strong faults lose only the first window |
+| 2026-10-03 | Train without dominant frequency features | SEU + CWRU | — | — | — | CWRU load 0 ball fault 96.3% → 90.7% | No | false alarms not better (8.8% → 10.0%) |
