@@ -26,6 +26,7 @@ Contents
 9. Improving XJTU → PHM: every experiment and the thinking behind it
 10. Uncertainty ranges: how sure is the prediction?
 11. Two weaknesses the tests found, and how they were fixed (plus false alarms)
+12. A stronger test: 32 bearings, both directions (and what it corrected)
 
 ---
 
@@ -1059,6 +1060,11 @@ when it runs on Mechanical-datasets.
   Bearing2_3 (rank 0.32). `rank_correlation` (Spearman) is reported next to
   R2 because an alarm threshold needs the ordering more than the absolute
   number.
+- **The transfer improvement is one-directional.** Tested the other way round
+  (train on PHM, predict XJTU-SY), the same fixes make the error WORSE (MAE
+  0.280 → 0.310; guessing gives 0.250). Only the ordering improves in both
+  directions (section 12). The fixes were chosen on PHM bearings and fit that
+  direction.
 - **Some bearings give almost no warning.** On several PHM bearings the only
   clear sign of damage is in the last 10% of life. No vibration-only model can
   predict well before that; this is a limit of the data.
@@ -1707,3 +1713,122 @@ the share of single windows flagged. Set the value to 1 to switch it off.
 4. **Every fix has a price, and the price is written next to the gain.** The
    single feature check added a few false alarms; persistence removed them and
    more, but hides weak faults.
+
+---
+
+## 12. A stronger test: 32 bearings, both directions (and what it corrected)
+
+### Why
+
+Every RUL decision in section 9 was chosen on 6 bearings and confirmed on 11.
+That is thin: ideas like B3 could be neither confirmed nor refuted. And every
+one of those 17 bearings is a PHM bearing — the model was only ever tested in
+one direction.
+
+### The design (`results/experiments/eval32.py`)
+
+- **View A, "new machine":** train on one lab, test on the other, in BOTH
+  directions. XJTU-SY → PHM gives 17 results, PHM → XJTU-SY gives 15. All 32
+  bearings are predicted by a model that never saw their lab.
+- **View B, "new bearing":** leave one bearing out of all 32 and train on the
+  other 31. The model has seen other bearings from the same lab.
+- **Paired comparison:** each variant is compared with the current system
+  bearing by bearing. The 95% interval of the average difference comes from
+  resampling the bearings 10000 times. If the interval contains 0, the
+  difference could be luck.
+
+**Decision rule, written before the first run:** adopt a change only if in
+View A the MAE improves and the interval excludes zero, and View B is not worse.
+
+### Result 1 — this week's fixes, looked at again
+
+"Original" = the system of 28 September. "Current" = with the quietest-point
+reference, the gate and cross-dataset smoothing (the XJTU → PHM settings).
+
+**View A, new machine:**
+
+| Direction | Metric | Original → current | Change [95% interval] |
+| --- | --- | --- | --- |
+| XJTU → PHM (17) | MAE | 0.216 → 0.175 | −0.041 [−0.074, −0.004] |
+| XJTU → PHM (17) | rank | 0.53 → 0.84 | +0.31 [+0.13, +0.50] |
+| PHM → XJTU (15) | MAE | 0.280 → **0.310** | **+0.031 [+0.002, +0.060]** |
+| PHM → XJTU (15) | rank | 0.55 → 0.81 | +0.26 [+0.03, +0.52] |
+| Both (32) | MAE | 0.246 → 0.238 | −0.008 [−0.033, +0.019] |
+| Both (32) | rank | 0.54 → 0.83 | +0.29 [+0.14, +0.44] |
+| Both (32) | R2 | −0.17 → −0.15 | +0.02 [−0.18, +0.21] |
+
+**What this says, plainly.**
+1. **The XJTU → PHM gain is real**: the interval excludes zero for MAE, rank
+   and R2. Section 9 stands for that direction.
+2. **It does not carry over to the other direction.** Trained on PHM and tested
+   on XJTU-SY, the same fixes make the error worse, and that is also outside
+   the range of luck. Both versions are worse than always guessing 0.5 (0.250)
+   in that direction.
+3. **So "works on a new machine" was too strong.** Over both directions the
+   error is not measurably better (the interval contains 0), and the average R2
+   is negative. What IS better in both directions is the **ordering**: rank
+   0.54 → 0.83. The honest claim is: *the fixes make the model order a new
+   machine's degradation correctly; they improve the absolute number only in
+   the direction they were chosen on.*
+4. **Why.** The fixes were selected on PHM bearings (6 dev, 11 test). The dev /
+   test split protected against fitting individual bearings, but not against
+   fitting the PHM lab as a whole. Run-in, the 10 minute window, the floor at
+   the training bearings' RUL — all were tuned to how PHM bearings behave when
+   seen from XJTU. Seen from PHM, XJTU bearings live up to 42 hours and fail
+   much louder, and those choices do not fit.
+
+**View B, new bearing (31 bearings from both labs in training):**
+
+| Metric | Original → current | Change [95% interval] |
+| --- | --- | --- |
+| MAE | 0.188 → 0.208 | +0.020 [+0.001, +0.040] |
+| R2 | 0.30 → 0.13 | −0.17 [−0.33, −0.01] |
+| rank | 0.76 → 0.76 | 0.00 [−0.08, +0.09] |
+
+When the model has seen the lab, the transfer fixes hurt. This confirms, now
+with an interval, the decision in section 9 to switch them on **only** for
+XJTU → PHM and to leave them off for same-lab protocols. Nothing changes in the
+code: that is already how `RUL_LOUDNESS_REFERENCE_BY_PROTOCOL` and
+`RUL_FPT_GATE_BY_PROTOCOL` are set.
+
+A useful side result: trained on 31 bearings from both labs with the original
+settings, a new bearing is predicted with MAE 0.188 and R2 0.30 — the best
+numbers in this project. More bearings from the same kind of machine help more
+than any of the tricks.
+
+### Result 2 — the idea that could not be decided (B3)
+
+"Kurtosis only counts once RMS has grown" fixed Bearing1_1 in section 9.
+
+| View | MAE change vs current [95% interval] | Bearings better / worse |
+| --- | --- | --- |
+| A | +0.006 [−0.021, +0.032] | 10 / 14 |
+| B | +0.011 [−0.013, +0.038] | 14 / 15 |
+
+It still fixes Bearing1_1 (rank 0.19 → 0.90) but breaks others (XJTU
+Bearing3_5 rank 1.00 → −0.68, PHM Bearing2_6 MAE 0.061 → 0.161). No improvement
+on average. **Rejected by the rule** — and this time it is a decision, not a
+shrug.
+
+### What changes from here
+
+- **Evaluation:** new RUL ideas are judged with `eval32.py` and the rule above.
+  It takes about 10 minutes per variant; results are cached per variant name.
+- **Claims:** the top-level README now gives both directions.
+- **Next ideas must help both directions**, or be switched on per direction
+  with that stated openly. Promising, given the above: express the settings
+  relative to each bearing instead of in fixed seconds (the 10 minute windows
+  are short for a 42 hour bearing and long for a 38 minute one).
+
+### Lessons
+
+1. **A test set from one source checks one thing.** 11 untouched PHM bearings
+   confirmed "better on PHM", not "better on new machines".
+2. **Test the reverse.** If A → B improves, check B → A before saying
+   "transfer".
+3. **An interval turns "it looks better" into "it is better" or "we cannot
+   tell".** The overall MAE change (−0.008) looked like a small win and is not
+   distinguishable from zero.
+4. **Rank and MAE answer different questions.** The model now orders
+   degradation well on an unseen machine and still cannot put a reliable number
+   on it. An alarm needs the first; a maintenance schedule needs the second.

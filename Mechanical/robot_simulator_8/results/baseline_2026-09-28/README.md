@@ -140,3 +140,7 @@ Sections 10 and 11 of `CODE_GUIDE_MECHANICAL.md` explain these four rows. Note: 
 frozen files in `raw/` are from 28 September, before these changes.
 | 2026-10-03 | **Anomaly alarms need 2 flagged windows in a row** (rule fixed before measuring) | SEU + CWRU | — | — | — | synthetic backlash 23.7% → 5.3% detected | **Yes** | false alarms 8.8% → 1.7% overall, CWRU load 3 22.2% → 0%; strong faults lose only the first window |
 | 2026-10-03 | Train without dominant frequency features | SEU + CWRU | — | — | — | CWRU load 0 ball fault 96.3% → 90.7% | No | false alarms not better (8.8% → 10.0%) |
+| 2026-10-03 | **32-bearing evaluation, both directions** (`eval32.py`) | new machine + new bearing | — | — | — | PHM → XJTU: MAE 0.310, worse than guessing | method adopted | this week's fixes: XJTU → PHM MAE −0.041 [−0.074, −0.004] (real); PHM → XJTU +0.031 [+0.002, +0.060] (worse); rank better both ways (0.54 → 0.83); with the lab seen they hurt (+0.020), confirming per-protocol settings |
+| 2026-10-03 | B3 again: kurtosis counts only once RMS has grown 0.2 | 32 bearings | +0.006 vs current | — | — | XJTU Bearing3_5 rank 1.00 → −0.68 | No | interval [−0.021, +0.032] contains 0 in view A; 10 better / 14 worse |
+
+Section 12 of `CODE_GUIDE_MECHANICAL.md` explains these rows and corrects the "new machine" claim.

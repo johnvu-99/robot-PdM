@@ -33,3 +33,4 @@ venv/
 
 # Experiment data cache (rebuilt automatically)
 **/results/experiments/.runs_*.pkl
+**/results/experiments/.eval32_cache.pkl

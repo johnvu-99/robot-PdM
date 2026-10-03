@@ -979,6 +979,14 @@ experiment, including the rejected ones, and the reasoning behind each is in
 
 Explained in CODE_GUIDE sections 10 and 11.
 
+**Correction 3 Oct: tested in both directions on all 32 bearings.** The gains
+above hold for XJTU -> PHM (MAE change -0.041, 95% interval [-0.074, -0.004]).
+In the reverse direction, PHM -> XJTU, the same fixes make the error worse
+(0.280 -> 0.310; guessing gives 0.250). What improves in both directions is the
+ordering of degradation (rank 0.54 -> 0.83). So the fixes fit the direction they
+were chosen on; "works on a new machine" holds for ordering, not for the
+absolute number. Details, intervals and the new evaluation: CODE_GUIDE section 12.
+
 Forcing the prediction to only go down (`RUL_MONOTONE_PREDICTION`) was tested
 and left off: it pushes rank to 0.94 - 1.00 for every model, even ones with
 negative R2, so rank stops meaning anything. Bearing2_5 and Bearing1_5 are still
