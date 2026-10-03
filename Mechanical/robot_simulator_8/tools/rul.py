@@ -159,6 +159,15 @@ def command_evaluate(args):
                   100 * result["interval"]["level"], result["interval"]["half_width"],
                   100 * result["summary"]["coverage"], worst["run_id"], 100 * worst["coverage"],
                   result["summary"]["interval_width"]))
+    summary = result["summary"]
+    if "stage_accuracy" in summary:
+        never = sum(1 for m in result["metrics"] if m["first_warning_life"] != m["first_warning_life"])
+        print("  stages (%s): right stage on %.0f%% of snapshots; near failure caught %.0f%%, "
+              "called too early %.0f%%; first warning at %.0f%% of life on average (never on %d bearings)" % (
+                  " / ".join(n.lower().replace("_", " ") for n, _ in config.RUL_STAGES),
+                  100 * summary["stage_accuracy"], 100 * summary["near_failure_caught"],
+                  100 * summary["near_failure_too_early"], 100 * summary.get("first_warning_life", float("nan")),
+                  never))
     print("\n  rank = Spearman correlation between true and predicted RUL: is the order right?")
     print("  late err % = error of the predicted remaining TIME, from 50% of life onwards,")
     print("  as a percent of total life (early in life the time estimate is unstable).")
@@ -230,23 +239,27 @@ def command_predict(args):
     print("%s: %d snapshots, %.2f h recorded, model %s" % (
         recording.run_id, len(recording.files), run["total_life_s"] / 3600.0, model.kind))
     bounds = model.predict_interval(prediction)
-    print("\n  %8s %8s %13s %15s %12s %9s" % ("time h", "% life", "predicted RUL",
+    from predictive.rul_model import stage_names, stage_of
+    stages = [stage_names()[k].lower().replace("_", " ") for k in stage_of(prediction)]
+    print("\n  %8s %8s %13s %15s %-13s %12s %9s" % ("time h", "% life", "predicted RUL",
                                               "%.0f%% range" % (100 * model.interval["level"]) if bounds else "range",
-                                              "remaining h", "health"))
+                                              "stage", "remaining h", "health"))
     for fraction in (0.1, 0.25, 0.5, 0.75, 0.9, 1.0):
         i = min(len(prediction) - 1, int(round(fraction * (len(prediction) - 1))))
         t = run["times"][i]
         f = float(prediction[i])
         remaining = t * f / (1.0 - f) / 3600.0 if 0.0 < f < 0.99 and t > 0 else None
         spread = "%.2f - %.2f" % (bounds[0][i], bounds[1][i]) if bounds else "n/a"
-        print("  %8.2f %7.0f%% %13.2f %15s %12s %9.2f" % (t / 3600.0, 100 * run["life_fraction"][i], f, spread,
-                                                         _fmt(remaining, "%.2f"), health[i]))
+        print("  %8.2f %7.0f%% %13.2f %15s %-13s %12s %9.2f" % (t / 3600.0, 100 * run["life_fraction"][i], f, spread,
+                                                               stages[i], _fmt(remaining, "%.2f"), health[i]))
     if bounds:
         print("\n  Range: the true RUL was inside it for %.0f%% of snapshots on bearings the model did not"
               % (100 * model.interval["level"]))
         print("  train on. A wide range means the model cannot tell more precisely; trust the range.")
     else:
         print("\n  This model file has no uncertainty range (trained before ranges existed, or on fewer than 3 bearings).")
+    print("\n  Stage: a rough guide only. Across labs the model called 'near failure' in time on fewer")
+    print("  than half of the bearings (CODE_GUIDE section 13); rely on the range and the trend.")
     print("\n  '% life' assumes the folder ends at failure (true for PHM 2012 and XJTU-SY).")
     print("  For a machine still running, read the last row: predicted RUL is the share of life left.")
 

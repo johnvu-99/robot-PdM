@@ -34,3 +34,8 @@ venv/
 # Experiment data cache (rebuilt automatically)
 **/results/experiments/.runs_*.pkl
 **/results/experiments/.eval32_cache.pkl
+
+# Timestamped RUL models from tools.rul train / compare are experiment output.
+# The published model has a stable name (models/rul_random_forest_xjtu_to_phm.joblib).
+**/models/rul_*_20[0-9][0-9][0-9][0-9][0-9][0-9]_*.joblib
+**/curves.csv

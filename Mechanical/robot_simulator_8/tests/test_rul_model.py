@@ -260,3 +260,29 @@ def test_range_survives_save_and_load_and_is_absent_without_cross_validation(tmp
     model = RULModel("LINEAR_REGRESSION").fit(training_runs()).set_interval(held_out_pairs())
     loaded = RULModel.load(model.save(str(tmp_path / "m.joblib")))
     assert loaded.interval == model.interval
+
+
+# -- stages ------------------------------------------------------------------
+
+def test_stage_boundaries():
+    from predictive.rul_model import stage_names, stage_of
+    assert stage_names() == ("EARLY", "LATE", "NEAR_FAILURE")
+    assert stage_of([1.0, 0.5, 0.49, 0.2, 0.19, 0.0]).tolist() == [0, 0, 1, 1, 2, 2]
+
+
+def test_stage_metrics_of_a_perfect_prediction():
+    run = make_run("A", snapshots=1001)
+    m = run_metrics(run, run["rul_fraction"])
+    assert m["stage_accuracy"] == 1.0 and m["near_failure_caught"] == 1.0
+    assert m["near_failure_too_early"] == 0.0
+    assert m["first_warning_life"] == pytest.approx(0.8, abs=0.002)
+
+
+def test_stage_metrics_of_a_model_that_never_warns_and_one_that_always_does():
+    run = make_run("A", snapshots=1001)
+    never = run_metrics(run, np.full(1001, 0.9))
+    assert never["near_failure_caught"] == 0.0 and np.isnan(never["first_warning_life"])
+    assert never["stage_accuracy"] == pytest.approx(0.5, abs=0.002)
+    always = run_metrics(run, np.full(1001, 0.1))
+    assert always["near_failure_caught"] == 1.0 and always["near_failure_too_early"] == 1.0
+    assert always["first_warning_life"] == 0.0

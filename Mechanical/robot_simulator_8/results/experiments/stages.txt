@@ -1,0 +1,16 @@
+
+XJTU-SY -> PHM 2012 (17 bearings)
+  model: current                     right stage  58% | near failure caught  34% | called near failure while early   4% | first warning at  58% of life | never warned  9, warned before half of life  3 (of 17)
+     calibrated cut-offs on the predicted scale: near failure below 0.18, late below 0.60
+  model: current, calibrated cuts    right stage  51% | near failure caught  26% | called near failure while early   3% | first warning at  70% of life | never warned  9, warned before half of life  1 (of 17)
+  model: original_28sep              right stage  48% | near failure caught   6% | called near failure while early   1% | first warning at  72% of life | never warned 10, warned before half of life  1 (of 17)
+  guess: always EARLY                right stage  50% | near failure caught   0% | called near failure while early   0% | first warning at nan% of life | never warned 17, warned before half of life  0 (of 17)
+  guess: always NEAR FAILURE         right stage  20% | near failure caught 100% | called near failure while early 100% | first warning at   0% of life | never warned  0, warned before half of life 17 (of 17)
+
+PHM 2012 -> XJTU-SY (15 bearings)
+  model: current                     right stage  55% | near failure caught  15% | called near failure while early   0% | first warning at  86% of life | never warned 10, warned before half of life  0 (of 15)
+     calibrated cut-offs on the predicted scale: near failure below 0.22, late below 0.54
+  model: current, calibrated cuts    right stage  55% | near failure caught  15% | called near failure while early   0% | first warning at  85% of life | never warned 10, warned before half of life  0 (of 15)
+  model: original_28sep              right stage  54% | near failure caught  15% | called near failure while early   0% | first warning at  84% of life | never warned 10, warned before half of life  0 (of 15)
+  guess: always EARLY                right stage  50% | near failure caught   0% | called near failure while early   0% | first warning at nan% of life | never warned 15, warned before half of life  0 (of 15)
+  guess: always NEAR FAILURE         right stage  20% | near failure caught 100% | called near failure while early 100% | first warning at   0% of life | never warned  0, warned before half of life 15 (of 15)

@@ -987,6 +987,13 @@ ordering of degradation (rank 0.54 -> 0.83). So the fixes fit the direction they
 were chosen on; "works on a new machine" holds for ordering, not for the
 absolute number. Details, intervals and the new evaluation: CODE_GUIDE section 12.
 
+**Three stage answer (3 Oct).** `tools.rul` also reports early / late / near
+failure. Measured across labs it is weak: right on 55-58% of snapshots (always
+saying "early" gives 50%), and the model never says "near failure" on 19 of 32
+bearings, though it almost never says it too early (0-4%). It is kept as an
+honest, practical measure of the model's limit. CODE_GUIDE section 13 also
+records the check of a third dataset (NASA / IMS: only 4 bearings that failed).
+
 Forcing the prediction to only go down (`RUL_MONOTONE_PREDICTION`) was tested
 and left off: it pushes rank to 0.94 - 1.00 for every model, even ones with
 negative R2, so rank stops meaning anything. Bearing2_5 and Bearing1_5 are still

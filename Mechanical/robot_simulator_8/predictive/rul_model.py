@@ -351,7 +351,41 @@ def run_metrics(run, prediction):
         metrics["late_life_time_mae_s"] = float(np.mean(np.abs(error)))
         metrics["late_life_time_error_percent_life"] = float(
             100.0 * np.mean(np.abs(error)) / max(run["total_life_s"], 1e-9))
+    metrics.update(stage_metrics(run, prediction))
     return metrics
+
+
+def stage_names():
+    return tuple(name for name, _ in config.RUL_STAGES)
+
+
+def stage_of(rul):
+    """Stage index per value (0 = first stage in RUL_STAGES, the healthiest)."""
+    rul = np.asarray(rul, dtype=np.float64)
+    stage = np.full(rul.shape, len(config.RUL_STAGES) - 1, dtype=int)
+    for index in range(len(config.RUL_STAGES) - 1, -1, -1):
+        stage[rul >= config.RUL_STAGES[index][1]] = index
+    return stage
+
+
+def stage_metrics(run, prediction):
+    """
+    How well the predicted STAGE matches the true one.
+      stage_accuracy          share of snapshots in the right stage
+      near_failure_caught     share of the true last stage that is called the last stage
+      near_failure_too_early  share of the true first stage that is called the last stage
+      first_warning_life      share of life lived when the last stage is first called
+                              (NaN if never; ideal = where the last stage truly starts)
+    """
+    truth, predicted = stage_of(run["rul_fraction"]), stage_of(prediction)
+    last = len(config.RUL_STAGES) - 1
+    warned = np.flatnonzero(predicted == last)
+    def share(mask, hit):
+        return float(np.mean(hit[mask])) if mask.any() else float("nan")
+    return {"stage_accuracy": float(np.mean(truth == predicted)),
+            "near_failure_caught": share(truth == last, predicted == last),
+            "near_failure_too_early": share(truth == 0, predicted == last),
+            "first_warning_life": float(run["life_fraction"][warned[0]]) if warned.size else float("nan")}
 
 
 def interval_metrics(run, low, high):
@@ -365,7 +399,8 @@ def aggregate(metrics_list):
     if not metrics_list:
         return {}
     keys = ("mae", "rmse", "r2", "rank_correlation", "mae_percent_life",
-            "late_life_time_error_percent_life", "coverage", "interval_width")
+            "late_life_time_error_percent_life", "coverage", "interval_width",
+            "stage_accuracy", "near_failure_caught", "near_failure_too_early", "first_warning_life")
     out = {"runs": len(metrics_list)}
     for key in keys:
         values = [m[key] for m in metrics_list if key in m and not np.isnan(m[key])]

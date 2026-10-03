@@ -549,6 +549,9 @@ RUL_MONOTONE_PREDICTION = False
 # of PHM snapshots. A width that depends on the predicted value was tested and
 # rejected: it covered only 83% on the dev bearings.
 RUL_INTERVAL_LEVEL = 0.90
+# Three stages, a coarser answer than a number: (name, RUL at or above which the
+# stage applies). Fixed before measuring anything.
+RUL_STAGES = (("EARLY", 0.5), ("LATE", 0.2), ("NEAR_FAILURE", 0.0))
 RUL_INTERVAL_POINTS_PER_RUN = 200
 
 RUL_MODELS = ("LINEAR_REGRESSION", "RANDOM_FOREST", "GRADIENT_BOOSTING")

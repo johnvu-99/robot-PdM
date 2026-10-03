@@ -27,6 +27,7 @@ Contents
 10. Uncertainty ranges: how sure is the prediction?
 11. Two weaknesses the tests found, and how they were fixed (plus false alarms)
 12. A stronger test: 32 bearings, both directions (and what it corrected)
+13. Not enough data: a third dataset checked, and the three stage answer
 
 ---
 
@@ -773,6 +774,11 @@ model was NOT trained on, it is smoothed with a 15 minute EMA
   remaining time with `elapsed × f / (1 − f)`, from 50% of life onwards. This
   formula explodes when f is close to 1, so treat large values with caution.
 
+**`stage_of(rul)`**, **`stage_metrics(run, prediction)`** — the three stage
+answer (`RUL_STAGES`: early ≥ 0.5, late ≥ 0.2, near failure below) and how
+well the predicted stage matches the true one; included in `run_metrics`
+(section 13).
+
 **`interval_metrics(run, low, high)`** — `coverage`: the share of snapshots
 whose true RUL is inside the range; `interval_width`: its average size.
 
@@ -996,6 +1002,7 @@ python -m tools.partner_data score    --root FOLDER --model FILE
 | `RUL_FPT_GATE_BY_PROTOCOL` | XJTU_TO_PHM: on, others: off | no prediction below the floor before degradation starts (section 9, Fix 4) |
 | `RUL_FPT_K` / `RUL_FPT_SUSTAIN_S` / `RUL_FPT_HEALTHY_S` | 5 / 120 s / 600 s | degradation start = 5 std above normal for 2 minutes, normal = first 10 minutes |
 | `RUL_FPT_STD_FLOOR` | 0.05 | "normal" never varies by less than 5%, so noise alone is not degradation (section 11) |
+| `RUL_STAGES` | early ≥ 0.5, late ≥ 0.2, near failure below | the three stage answer (section 13) |
 | `RUL_INTERVAL_LEVEL` | 0.90 | the uncertainty range should contain the true RUL this often (section 10) |
 | `RUL_CROSS_DATASET_SMOOTHING_TAU_S` | 900 s | smooth predictions on a dataset the model was not trained on |
 | `RUL_MONOTONE_PREDICTION` | False | force RUL to only go down (rejected, section 9) |
@@ -1065,6 +1072,8 @@ when it runs on Mechanical-datasets.
   0.280 → 0.310; guessing gives 0.250). Only the ordering improves in both
   directions (section 12). The fixes were chosen on PHM bearings and fit that
   direction.
+- **The model rarely says "near failure".** Across labs it never does on 19 of
+  32 bearings, and catches only 15–34% of the last fifth of life (section 13).
 - **Some bearings give almost no warning.** On several PHM bearings the only
   clear sign of damage is in the last 10% of life. No vibration-only model can
   predict well before that; this is a limit of the data.
@@ -1893,3 +1902,100 @@ improves the "new machine" error in both directions. The limit now is evidence
 4. **Rank and MAE answer different questions.** The model now orders
    degradation well on an unseen machine and still cannot put a reliable number
    on it. An alarm needs the first; a maintenance schedule needs the second.
+
+---
+
+## 13. Not enough data: a third dataset checked, and the three stage answer
+
+Section 12 ended with "the limit is evidence, not ideas". Two ways to deal with
+that were tried on 3 October.
+
+### 13.1 A third run-to-failure dataset: NASA / IMS (checked, not added)
+
+What the public descriptions say (not yet verified against the files):
+
+| | |
+| --- | --- |
+| Source | Center for Intelligent Maintenance Systems (IMS), University of Cincinnati, via the NASA Prognostics Data Repository |
+| Rig | 4 bearings on one shaft, 2000 rpm, 6000 lb load |
+| Recording | 20,480 samples at 20 kHz (about 1 s), one file every 10 minutes |
+| Tests | 3 run-to-failure tests of 4 bearings each = 12 bearings |
+| **Bearings that actually failed** | **4**: test 1 bearing 3 (inner race) and bearing 4 (roller), test 2 bearing 1 (outer race), test 3 bearing 3 (outer race) |
+| Channels | test 1: two accelerometers per bearing; tests 2 and 3: one per bearing |
+| Terms | public (US government works); NASA asks that the repository and the donor are acknowledged |
+
+**Verdict: useful, but smaller than it sounds.**
+- Only the 4 failed bearings have a known end of life, so only 4 can be scored
+  for RUL. The other 8 were stopped while still working.
+- They come from just 3 tests; bearings on the same shaft share load and
+  disturbances, so they are less independent than 4 separate tests.
+- Tests 2 and 3 have one channel per bearing; the features here use two
+  (horizontal and vertical), so the adapter would have to use one channel twice
+  or the feature set would have to change.
+- 4 bearings cannot settle the open questions of section 12 with confidence.
+  They WOULD be a first test on a lab that was never used for choosing anything.
+- The official download link answered "forbidden" to an automated request on
+  3 October; a copy is on Kaggle (account needed). Not downloaded.
+
+Next step if wanted: download by hand, read its README, then write
+`datasets/ims.py` on `RunToFailureAdapter` and score it once, untouched.
+
+### 13.2 The three stage answer (added; measured to be weak)
+
+**The idea.** A planner does not need "RUL 0.37"; "early / late / near failure"
+would do. The guess was that three coarse stages need less data than a precise
+number.
+
+**Definitions, fixed before measuring** (`RUL_STAGES`): early = at least half of
+life left; late = 20–50%; near failure = under 20%.
+
+**Result** (`results/experiments/stages.py`; each lab predicted by a model
+trained on the other):
+
+| | Right stage | Near failure caught | Called near failure while early | Never warned |
+| --- | --- | --- | --- | --- |
+| XJTU → PHM, current model | 58% | 34% | 4% | 9 of 17 bearings |
+| XJTU → PHM, model of 28 Sep | 48% | 6% | 1% | 10 of 17 |
+| PHM → XJTU, current model | 55% | 15% | 0% | 10 of 15 |
+| PHM → XJTU, model of 28 Sep | 54% | 15% | 0% | 10 of 15 |
+| Always say "early" | 50% | 0% | 0% | all |
+| Always say "near failure" | 20% | 100% | 100% | none |
+
+**What it says.**
+- **The guess was wrong.** The stage answer is right 55–58% of the time, where
+  always saying "early" scores 50%. On 19 of 32 bearings the model never says
+  "near failure" at all.
+- **Why.** The model rarely predicts below 0.2, even at the moment of failure
+  (it typically ends at 0.1–0.3). A random forest averages many bearings, the
+  smoothing pulls toward the middle, and bearings that fail quietly never look
+  like the loud failures it learned. The stages are cut from the predicted
+  number, so they inherit every one of its errors.
+- **The good part:** it almost never cries wolf (0–4% "near failure" while
+  early), and this week's fixes did help on PHM (near failure caught 6% → 34%).
+- **A fix tested and rejected:** moving the cut-offs to where the model's own
+  held-out predictions put the lowest 20% and 50% (the same honest errors the
+  uncertainty range uses). Rule written first: adopt only if the right-stage
+  share improves in both directions with early false calls under 10%. Result:
+  XJTU → PHM 58% → 51%, PHM → XJTU 55% → 55%. **Rejected.** The cut-offs barely
+  move (0.18 and 0.60 instead of 0.20 and 0.50); the problem is not where the
+  line is but that predictions do not get there.
+
+**What was kept.**
+- `tools.rul evaluate` prints the stage line, and `predict` shows a stage
+  column with a printed caution. They are kept because "never warned on 9 of 17
+  bearings" is the most practical description of the model's weakness — more
+  telling than MAE 0.175.
+- The stage numbers are in `run_metrics`, so every future experiment reports
+  them.
+
+**What this changes.** "Near failure caught" and "never warned" are now the
+numbers to move. An idea that lowers MAE but still never warns has not made the
+system more useful. A model built to answer "is this the last fifth of life?"
+directly (a classifier, instead of cutting a regression) is the obvious next
+experiment, judged with `eval32.py`-style both-direction testing.
+
+### Lesson
+
+Changing the question does not create information. If the number is unreliable,
+stages cut from that number are unreliable too. The measurement was still worth
+doing: it replaced a hopeful claim with a known one.

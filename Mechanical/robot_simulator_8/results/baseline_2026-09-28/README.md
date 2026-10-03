@@ -148,3 +148,9 @@ Section 12 of `CODE_GUIDE_MECHANICAL.md` explains these rows and corrects the "n
 | 2026-10-03 | Smoothing over 5 / 10 / 20% of the bearing's age | 32 bearings | +0.004 to +0.007 vs current | — | −0.04 to −0.11 | — | No | no gain, worse ordering |
 | 2026-10-03 | Asymmetric smoothing (fast down, slow up) | 32 bearings | 0.000 / +0.001 | — | −0.11 / −0.15 | — | No | lets downward noise through |
 | 2026-10-03 | Average of model types (3, or RF + GB) | 32 bearings | −0.009 | — | +0.03 | helps 18–20, hurts 9–10 | No (yet) | interval [−0.021, +0.003] / [−0.019, +0.001] touches zero; 13 versions tested at once |
+| 2026-10-03 | Three stage answer (early / late / near failure), boundaries fixed in advance | both directions, 32 bearings | — | — | — | never says "near failure" on 19 of 32 bearings | kept as a measure | right stage 55–58% vs 50% for always "early"; near failure caught 34% (XJTU → PHM) and 15% (PHM → XJTU); too early 0–4% |
+| 2026-10-03 | Stage cut-offs calibrated on held-out predictions | both directions | — | — | — | — | No | right stage 58% → 51% and 55% → 55%; cut-offs barely move |
+| 2026-10-03 | NASA / IMS dataset checked | — | — | — | — | — | not added | 12 bearings but only 4 failed, from 3 tests; one channel per bearing in tests 2–3; not downloaded |
+
+Section 13 of `CODE_GUIDE_MECHANICAL.md` explains these rows. The published model is now
+`models/rul_random_forest_xjtu_to_phm.joblib` (trained 3 Oct with the current code).
